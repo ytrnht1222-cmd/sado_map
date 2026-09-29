@@ -15,6 +15,15 @@
             height: 600px;
             width: 100%;
         }
+
+         /* 絵文字マーカー */
+    .emoji-marker {
+        font-size: 30px;
+        text-align: center;
+        line-height: 40px;
+        background: none;
+        border: none;
+    }
     </style>
 </head>
 
@@ -59,34 +68,82 @@ const layers = {
 
 
 // ==============================
+// カテゴリーごとのマーカーアイコン
+// ==============================
+
+const icons = {
+
+    "活動場所": L.divIcon({
+        html: "🌾",
+        className: "emoji-marker",
+        iconSize: [40, 40],
+        iconAnchor: [20, 20]
+    }),
+
+    "宿泊": L.divIcon({
+        html: "🏠",
+        className: "emoji-marker",
+        iconSize: [40, 40],
+        iconAnchor: [20, 20]
+    }),
+
+    "観光": L.divIcon({
+        html: "📍",
+        className: "emoji-marker",
+        iconSize: [40, 40],
+        iconAnchor: [20, 20]
+    }),
+
+    "飲食店": L.divIcon({
+        html: "🍴",
+        className: "emoji-marker",
+        iconSize: [40, 40],
+        iconAnchor: [20, 20]
+    })
+
+};
+
+
+// ==============================
 // 場所データからマーカーを作る
 // ==============================
 
 places.forEach(function(place) {
 
-    const marker = L.marker([
-        place.lat,
-        place.lng
-    ]);
+    const marker = L.marker(
+        [place.lat, place.lng],
+        {
+            icon: icons[place.category]
+        }
+    );
 
+
+    // ==============================
     // ポップアップ
+    // ==============================
+
     marker.bindPopup(`
-    <div style="width: 220px;">
-        <img src="${place.image}"
-             style="width: 100%;">
+        <div style="width: 220px;">
 
-        <h3>${place.name}</h3>
+            <h3>${place.name}</h3>
 
-        <p>
-            <strong>カテゴリー：</strong>
-            ${place.category}
-        </p>
+            <p>
+                <strong>カテゴリー：</strong>
+                ${place.category}
+            </p>
 
-        <p>${place.description}</p>
-    </div>
-`);
+            <p>
+                ${place.description}
+            </p>
 
-    // 該当するカテゴリーのレイヤーに追加
+        </div>
+    `);
+
+
+    // ==============================
+    // カテゴリーごとのレイヤーに追加
+    // ==============================
+
     if (layers[place.category]) {
         marker.addTo(layers[place.category]);
     }
