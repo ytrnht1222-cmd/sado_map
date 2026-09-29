@@ -123,21 +123,45 @@ places.forEach(function(place) {
     // ==============================
 
     marker.bindPopup(`
-        <div style="width: 220px;">
+    <div style="width: 260px;">
 
-            <h3>${place.name}</h3>
+        <h2>${place.name}</h2>
 
-            <p>
-                <strong>カテゴリー：</strong>
-                ${place.category}
-            </p>
+        <p>
+            <strong>カテゴリー：</strong>
+            ${place.category}
+        </p>
 
-            <p>
-                ${place.description}
-            </p>
+        <hr>
 
-        </div>
-    `);
+        <p>
+            <strong>📍 所在地</strong><br>
+            ${place.address}
+        </p>
+
+        <p>
+            <strong>🌾 活動内容</strong><br>
+            ${place.activity}
+        </p>
+
+        <p>
+            <strong>📅 最終活動</strong><br>
+            ${place.lastActivity}
+        </p>
+
+        <p>
+            <strong>📝 メモ</strong><br>
+            ${place.note}
+        </p>
+
+        <hr>
+
+        <p>
+            ${place.description}
+        </p>
+
+    </div>
+`);
 
 
     // ==============================
