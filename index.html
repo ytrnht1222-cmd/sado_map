@@ -41,7 +41,7 @@
         ).addTo(map);
 
         // ==============================
-        // 佐渡島の場所データ
+        // 佐渡島の場所データ（試験段階）
         // ==============================
 
         const places = [
@@ -71,8 +71,21 @@
 ];
 
 
+
 // ==============================
-// 地図にピンを追加
+// カテゴリーごとのレイヤーを作る
+// ==============================
+
+const layers = {
+    "活動場所": L.layerGroup(),
+    "宿泊": L.layerGroup(),
+    "観光": L.layerGroup(),
+    "飲食店": L.layerGroup()
+};
+
+
+// ==============================
+// 場所データからマーカーを作る
 // ==============================
 
 places.forEach(function(place) {
@@ -80,15 +93,45 @@ places.forEach(function(place) {
     const marker = L.marker([
         place.lat,
         place.lng
-    ]).addTo(map);
+    ]);
 
+    // ポップアップ
     marker.bindPopup(`
         <h3>${place.name}</h3>
         <p><strong>カテゴリー：</strong>${place.category}</p>
         <p>${place.description}</p>
     `);
 
+    // 該当するカテゴリーのレイヤーに追加
+    if (layers[place.category]) {
+        marker.addTo(layers[place.category]);
+    }
+
 });
+
+
+// ==============================
+// 最初は全部表示
+// ==============================
+
+Object.values(layers).forEach(function(layer) {
+    layer.addTo(map);
+});
+
+
+// ==============================
+// 右上にカテゴリー選択メニューを表示
+// ==============================
+
+const overlayMaps = {
+    "🌾 活動場所": layers["活動場所"],
+    "🏠 宿泊": layers["宿泊"],
+    "📍 観光": layers["観光"],
+    "🍴 飲食店": layers["飲食店"]
+};
+
+L.control.layers(null, overlayMaps).addTo(map);        
+
       
     </script>
 
