@@ -1,13 +1,45 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
+
     <title>佐渡島マップ</title>
+
+    <!-- LeafletのCSS -->
+    <link rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+    <style>
+        /* 地図を表示する場所 */
+        #map {
+            height: 600px;
+            width: 100%;
+        }
+    </style>
 </head>
 
 <body>
 
     <h1>佐渡島マップ</h1>
+
+    <!-- ここに地図が表示される -->
+    <div id="map"></div>
+
+    <!-- Leaflet本体 -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        // 佐渡島付近を中心に地図を作る
+        const map = L.map('map').setView([38.0, 138.4], 10);
+
+        // OpenStreetMapの地図を読み込む
+        L.tileLayer(
+            'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            {
+                attribution: '&copy; OpenStreetMap contributors'
+            }
+        ).addTo(map);
+    </script>
 
 </body>
 </html>
