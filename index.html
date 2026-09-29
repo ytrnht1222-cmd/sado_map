@@ -39,6 +39,15 @@
                 attribution: '&copy; OpenStreetMap contributors'
             }
         ).addTo(map);
+
+        // 佐渡島にマーカーを追加
+        const marker = L.marker([38.0, 138.4]).addTo(map);
+
+        // マーカーをクリックしたときに表示する情報
+        marker.bindPopup(`
+            <h3>佐渡島の活動場所</h3>
+            <p>ここはRECの活動場所です。</p>
+`);
     </script>
 
 </body>
