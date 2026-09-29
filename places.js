@@ -1,7 +1,6 @@
-
- // ==============================
- // 佐渡島の場所データ（試験段階）
- // ==============================
+// ==============================
+// 佐渡島の場所データ（試験段階）
+// ==============================
 
 const places = [
     {
@@ -9,7 +8,7 @@ const places = [
         lng: 138.4,
         name: "活動場所①",
         category: "活動場所",
-        description: "RECで農作業などを行う場所です。"
+        description: "RECで農作業などを行う場所です。",
         image: "images/tanada.jpg"
     },
 
@@ -18,7 +17,8 @@ const places = [
         lng: 138.35,
         name: "宿泊場所①",
         category: "宿泊",
-        description: "佐渡合宿で利用する宿泊場所です。"
+        description: "佐渡合宿で利用する宿泊場所です。",
+        image: "images/syukuhaku.jpg"
     },
 
     {
@@ -26,9 +26,7 @@ const places = [
         lng: 138.45,
         name: "観光スポット①",
         category: "観光",
-        description: "佐渡の観光スポットです。"
+        description: "佐渡の観光スポットです。",
+        image: "images/sightseeing.jpg"
     }
 ];
-
-
-
