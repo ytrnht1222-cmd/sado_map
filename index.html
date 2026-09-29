@@ -40,14 +40,56 @@
             }
         ).addTo(map);
 
-        // 佐渡島にマーカーを追加
-        const marker = L.marker([38.0, 138.4]).addTo(map);
+        // ==============================
+        // 佐渡島の場所データ
+        // ==============================
 
-        // マーカーをクリックしたときに表示する情報
-        marker.bindPopup(`
-            <h3>佐渡島の活動場所</h3>
-            <p>ここはRECの活動場所です。</p>
-`);
+        const places = [
+    {
+        lat: 38.0,
+        lng: 138.4,
+        name: "活動場所①",
+        category: "活動場所",
+        description: "RECで農作業などを行う場所です。"
+    },
+
+    {
+        lat: 38.03,
+        lng: 138.35,
+        name: "宿泊場所①",
+        category: "宿泊",
+        description: "佐渡合宿で利用する宿泊場所です。"
+    },
+
+    {
+        lat: 37.98,
+        lng: 138.45,
+        name: "観光スポット①",
+        category: "観光",
+        description: "佐渡の観光スポットです。"
+    }
+];
+
+
+// ==============================
+// 地図にピンを追加
+// ==============================
+
+places.forEach(function(place) {
+
+    const marker = L.marker([
+        place.lat,
+        place.lng
+    ]).addTo(map);
+
+    marker.bindPopup(`
+        <h3>${place.name}</h3>
+        <p><strong>カテゴリー：</strong>${place.category}</p>
+        <p>${place.description}</p>
+    `);
+
+});
+      
     </script>
 
 </body>
