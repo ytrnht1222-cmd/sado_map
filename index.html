@@ -51,6 +51,7 @@
         name: "活動場所①",
         category: "活動場所",
         description: "RECで農作業などを行う場所です。"
+        image: "images/tanada.jpg"
     },
 
     {
@@ -97,10 +98,20 @@ places.forEach(function(place) {
 
     // ポップアップ
     marker.bindPopup(`
+    <div style="width: 220px;">
+        <img src="${place.image}"
+             style="width: 100%;">
+
         <h3>${place.name}</h3>
-        <p><strong>カテゴリー：</strong>${place.category}</p>
+
+        <p>
+            <strong>カテゴリー：</strong>
+            ${place.category}
+        </p>
+
         <p>${place.description}</p>
-    `);
+    </div>
+`);
 
     // 該当するカテゴリーのレイヤーに追加
     if (layers[place.category]) {
