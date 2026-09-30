@@ -170,13 +170,23 @@
     <div id="authArea">
         <button id="loginButton">🔑 Googleでログイン</button>
         <button id="logoutButton" style="display:none;">ログアウト</button>
-        <span id="userInfo"></span>
+        <span id="userInfo"></span><span id="roleInfo" style="margin-left:10px;"></span>
     </div>
 
     <!-- RECメンバーだけ表示 -->
     <div id="controls" style="display:none;">
         <button id="editModeButton">✏️ 編集モード</button>
         <span id="modeText">現在：閲覧モード</span>
+    </div>
+
+    <div id="categoryFilters" style="margin:10px 0;">
+        <strong>表示：</strong>
+        <button type="button" onclick="showAllLayers()">すべて</button>
+        <button type="button" onclick="showCategory('活動場所')">🌾 活動場所</button>
+        <button type="button" onclick="showCategory('宿泊地')">🏠 宿泊地</button>
+        <button type="button" onclick="showCategory('観光地')">📍 観光地</button>
+        <button type="button" onclick="showCategory('飲食店')">🍴 飲食店</button>
+        <button type="button" onclick="showCategory('生活用品店')">🛒 生活用品店</button>
     </div>
 
     <div id="map"></div>
@@ -380,6 +390,7 @@
 
         // RECメンバーかどうか
         let currentUserIsMember = false;
+        let currentUserIsAdmin = false;
 
 
         // =========================================
@@ -485,19 +496,40 @@
                 `;
 
 
-                // RECメンバーなら編集ボタンを表示
-                if (currentUserIsMember) {
+                // 編集モード中のRECメンバーだけ編集ボタンを表示
+                if (currentUserIsMember && editMode) {
 
                     popupHtml += `
-                        <button
-                            onclick="openEditForm(${place.id})"
-                            style="
-                                padding:6px 10px;
-                                cursor:pointer;
-                            "
-                        >
-                            ✏️ 編集
-                        </button>
+                        <div style="margin-top:10px;">
+                            <button
+                                onclick="openEditForm(${place.id})"
+                                style="
+                                    padding:6px 10px;
+                                    cursor:pointer;
+                                    margin-right:5px;
+                                "
+                            >
+                                ✏️ 編集
+                            </button>
+                    `;
+
+                    // 管理者だけ削除ボタンを表示
+                    if (currentUserIsAdmin) {
+                        popupHtml += `
+                            <button
+                                onclick="deleteSpot(${place.id}, '${String(place.name || "").replace(/'/g, "\\'")}')"
+                                style="
+                                    padding:6px 10px;
+                                    cursor:pointer;
+                                "
+                            >
+                                🗑️ 削除
+                            </button>
+                        `;
+                    }
+
+                    popupHtml += `
+                        </div>
                     `;
                 }
 
@@ -541,6 +573,40 @@
 
 
         // =========================================
+        // カテゴリー表示切り替え
+        // =========================================
+
+        function showAllLayers() {
+
+            Object.values(layers).forEach(
+                function(layer) {
+                    if (!map.hasLayer(layer)) {
+                        layer.addTo(map);
+                    }
+                }
+            );
+        }
+
+        function showCategory(category) {
+
+            Object.values(layers).forEach(
+                function(layer) {
+                    if (map.hasLayer(layer)) {
+                        map.removeLayer(layer);
+                    }
+                }
+            );
+
+            if (layers[category]) {
+                layers[category].addTo(map);
+            }
+        }
+
+        window.showAllLayers = showAllLayers;
+        window.showCategory = showCategory;
+
+
+        // =========================================
         // 編集モード
         // =========================================
 
@@ -577,6 +643,9 @@
                     modeText.textContent =
                         "現在：閲覧モード";
                 }
+
+                // ポップアップ内の編集・削除ボタン表示を更新
+                loadPlaces();
             }
         );
 
@@ -1047,6 +1116,55 @@
 
 
         // =========================================
+        // スポット削除（管理者のみ）
+        // =========================================
+
+        async function deleteSpot(id, name) {
+
+            if (!currentUserIsAdmin) {
+                alert("削除できるのは管理者だけです");
+                return;
+            }
+
+            const answer = confirm(
+                "「" + name + "」を削除しますか？\n\n" +
+                "この操作は元に戻せません。"
+            );
+
+            if (!answer) {
+                return;
+            }
+
+            const { error } =
+                await supabaseClient
+                    .from("spots")
+                    .delete()
+                    .eq("id", id);
+
+            if (error) {
+
+                console.error(
+                    "削除エラー:",
+                    error
+                );
+
+                alert(
+                    "削除に失敗しました。\n" +
+                    error.message
+                );
+
+                return;
+            }
+
+            alert("スポットを削除しました！");
+
+            await loadPlaces();
+        }
+
+        window.deleteSpot = deleteSpot;
+
+
+        // =========================================
         // Googleログイン
         // =========================================
 
@@ -1202,9 +1320,45 @@
 
                     currentUserIsMember = true;
 
+                    // 管理者かどうかも確認
+                    const {
+                        data: isAdmin,
+                        error: adminError
+                    } =
+                        await supabaseClient.rpc(
+                            "is_rec_admin"
+                        );
+
+                    console.log(
+                        "管理者判定:",
+                        isAdmin
+                    );
+
+                    console.log(
+                        "管理者判定エラー:",
+                        adminError
+                    );
+
+                    if (adminError) {
+                        console.error(
+                            "管理者確認エラー:",
+                            adminError
+                        );
+                        currentUserIsAdmin = false;
+                    } else {
+                        currentUserIsAdmin = !!isAdmin;
+                    }
+
                     document.getElementById(
                         "controls"
                     ).style.display = "block";
+
+                    document.getElementById(
+                        "roleInfo"
+                    ).textContent =
+                        currentUserIsAdmin
+                        ? "（REC管理者）"
+                        : "（RECメンバー）";
 
                 } else {
 
@@ -1230,8 +1384,12 @@
                     "none";
 
                 userInfo.textContent = "";
+                document.getElementById(
+                    "roleInfo"
+                ).textContent = "";
 
                 currentUserIsMember = false;
+                currentUserIsAdmin = false;
 
                 document.getElementById(
                     "controls"
