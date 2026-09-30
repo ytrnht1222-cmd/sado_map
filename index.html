@@ -97,6 +97,20 @@
             resize: vertical;
         }
 
+        .photo-preview {
+            width: 100%;
+            max-height: 220px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+
+        .photo-help {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
         #formButtons {
             margin-top: 15px;
             text-align: right;
@@ -230,6 +244,12 @@
         <textarea id="spotNote"
                   placeholder="自由にメモを入力"></textarea>
 
+        <label for="spotImage">写真</label>
+        <input type="file"
+               id="spotImage"
+               accept="image/*">
+        <div class="photo-help">JPG・PNGなど、5MB以下を推奨</div>
+
         <div id="formButtons">
             <button type="button" id="cancelButton">キャンセル</button>
             <button type="button" id="saveButton">保存</button>
@@ -266,6 +286,13 @@
 
         <label for="editSpotNote">メモ</label>
         <textarea id="editSpotNote"></textarea>
+
+        <label for="editSpotImage">写真を変更</label>
+        <input type="file"
+               id="editSpotImage"
+               accept="image/*">
+        <div class="photo-help">新しい写真を選択した場合のみ変更されます</div>
+        <div id="editPhotoPreview"></div>
 
         <div id="editFormButtons">
             <button type="button" id="editCancelButton">キャンセル</button>
@@ -454,6 +481,18 @@
                     <div style="width:260px;">
 
                         <h2>${place.name || ""}</h2>
+
+                        ${
+                            place.image_url
+                            ?
+                            `<img
+                                src="${place.image_url}"
+                                alt="${place.name || "スポット写真"}"
+                                class="photo-preview"
+                            >`
+                            :
+                            ""
+                        }
 
                         <p>
                             <strong>カテゴリー：</strong>
@@ -811,6 +850,11 @@
                 }
 
 
+                const imageFile =
+                    document.getElementById(
+                        "spotImage"
+                    ).files[0];
+
                 // Supabaseに登録
                 const { data, error } =
                     await supabaseClient
@@ -850,6 +894,102 @@
                     "保存されたデータ:",
                     data
                 );
+
+                const newSpot = data && data[0];
+
+                // 写真が選択されている場合はStorageへアップロード
+                if (imageFile && newSpot) {
+
+                    if (!imageFile.type.startsWith("image/")) {
+                        alert("写真ファイルを選択してください");
+                        return;
+                    }
+
+                    if (imageFile.size > 5 * 1024 * 1024) {
+                        alert("写真は5MB以下にしてください");
+                        return;
+                    }
+
+                    const extension =
+                        imageFile.name
+                            .split(".")
+                            .pop()
+                            .toLowerCase();
+
+                    const filePath =
+                        "spot-" +
+                        newSpot.id +
+                        "-" +
+                        Date.now() +
+                        "." +
+                        extension;
+
+                    const {
+                        error: uploadError
+                    } =
+                        await supabaseClient.storage
+                            .from("spot-images")
+                            .upload(
+                                filePath,
+                                imageFile,
+                                {
+                                    cacheControl: "3600",
+                                    upsert: false
+                                }
+                            );
+
+                    if (uploadError) {
+
+                        console.error(
+                            "写真アップロードエラー:",
+                            uploadError
+                        );
+
+                        alert(
+                            "スポットは登録されましたが、写真の保存に失敗しました。\n" +
+                            uploadError.message
+                        );
+
+                    } else {
+
+                        const {
+                            data: publicUrlData
+                        } =
+                            supabaseClient.storage
+                                .from("spot-images")
+                                .getPublicUrl(
+                                    filePath
+                                );
+
+                        const imageUrl =
+                            publicUrlData.publicUrl;
+
+                        const {
+                            error: imageUrlError
+                        } =
+                            await supabaseClient
+                                .from("spots")
+                                .update({
+                                    image_url: imageUrl
+                                })
+                                .eq(
+                                    "id",
+                                    newSpot.id
+                                );
+
+                        if (imageUrlError) {
+
+                            console.error(
+                                "写真URL保存エラー:",
+                                imageUrlError
+                            );
+
+                            alert(
+                                "スポットは登録されましたが、写真URLの保存に失敗しました。"
+                            );
+                        }
+                    }
+                }
 
                 alert(
                     "スポットを保存しました！"
@@ -965,6 +1105,27 @@
             ).value =
                 data.note || "";
 
+            document.getElementById(
+                "editSpotImage"
+            ).value = "";
+
+            const editPhotoPreview =
+                document.getElementById(
+                    "editPhotoPreview"
+                );
+
+            if (data.image_url) {
+                editPhotoPreview.innerHTML =
+                    `<img
+                        src="${data.image_url}"
+                        alt="現在のスポット写真"
+                        class="photo-preview"
+                    >`;
+            } else {
+                editPhotoPreview.innerHTML =
+                    "<p>現在、写真は登録されていません。</p>";
+            }
+
 
             // 編集フォームを表示
             document.getElementById(
@@ -1046,6 +1207,11 @@
                         "editSpotNote"
                     ).value;
 
+                const imageFile =
+                    document.getElementById(
+                        "editSpotImage"
+                    ).files[0];
+
 
                 if (!name) {
 
@@ -1096,6 +1262,100 @@
                     "更新されたデータ:",
                     data
                 );
+
+                // 新しい写真が選択されていればアップロード
+                if (imageFile) {
+
+                    if (!imageFile.type.startsWith("image/")) {
+                        alert("写真ファイルを選択してください");
+                        return;
+                    }
+
+                    if (imageFile.size > 5 * 1024 * 1024) {
+                        alert("写真は5MB以下にしてください");
+                        return;
+                    }
+
+                    const extension =
+                        imageFile.name
+                            .split(".")
+                            .pop()
+                            .toLowerCase();
+
+                    const filePath =
+                        "spot-" +
+                        editingSpotId +
+                        "-" +
+                        Date.now() +
+                        "." +
+                        extension;
+
+                    const {
+                        error: uploadError
+                    } =
+                        await supabaseClient.storage
+                            .from("spot-images")
+                            .upload(
+                                filePath,
+                                imageFile,
+                                {
+                                    cacheControl: "3600",
+                                    upsert: false
+                                }
+                            );
+
+                    if (uploadError) {
+
+                        console.error(
+                            "写真アップロードエラー:",
+                            uploadError
+                        );
+
+                        alert(
+                            "文章は更新されましたが、写真の保存に失敗しました。\n" +
+                            uploadError.message
+                        );
+
+                    } else {
+
+                        const {
+                            data: publicUrlData
+                        } =
+                            supabaseClient.storage
+                                .from("spot-images")
+                                .getPublicUrl(
+                                    filePath
+                                );
+
+                        const imageUrl =
+                            publicUrlData.publicUrl;
+
+                        const {
+                            error: imageUrlError
+                        } =
+                            await supabaseClient
+                                .from("spots")
+                                .update({
+                                    image_url: imageUrl
+                                })
+                                .eq(
+                                    "id",
+                                    editingSpotId
+                                );
+
+                        if (imageUrlError) {
+
+                            console.error(
+                                "写真URL更新エラー:",
+                                imageUrlError
+                            );
+
+                            alert(
+                                "文章は更新されましたが、写真URLの更新に失敗しました。"
+                            );
+                        }
+                    }
+                }
 
                 alert(
                     "スポットを更新しました！"
