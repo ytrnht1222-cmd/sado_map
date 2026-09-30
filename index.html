@@ -56,6 +56,59 @@
             font-size: 14px;
         }
 
+        /* 管理者パネル */
+        #adminPanel {
+            display: none;
+            margin: 10px 0;
+            padding: 15px;
+            background: #fff7e6;
+            border: 1px solid #f0c36d;
+            border-radius: 10px;
+        }
+
+        #adminPanel h3 {
+            margin-top: 0;
+        }
+
+        #adminPanel input {
+            padding: 8px;
+            width: 280px;
+            max-width: 90%;
+            box-sizing: border-box;
+        }
+
+        #adminPanel button {
+            padding: 8px 12px;
+            margin-left: 5px;
+            cursor: pointer;
+        }
+
+        #memberList {
+            margin-top: 12px;
+        }
+
+        .member-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 7px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .member-email {
+            flex: 1;
+            word-break: break-all;
+        }
+
+        .member-role {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .remove-member-button {
+            margin-left: auto !important;
+        }
+
         /* スポット追加フォーム */
         #spotForm {
             display: none;
@@ -233,6 +286,25 @@
         <button id="loginButton">🔑 Googleでログイン</button>
         <button id="logoutButton" style="display:none;">ログアウト</button>
         <span id="userInfo"></span><span id="roleInfo" style="margin-left:10px;"></span>
+    </div>
+
+
+    <!-- REC管理者だけ表示されるメンバー管理画面 -->
+    <div id="adminPanel">
+        <h3>👑 RECメンバー管理</h3>
+        <div>
+            <span>Googleアカウントのメールアドレス：</span>
+            <input
+                type="email"
+                id="newMemberEmail"
+                placeholder="example@gmail.com"
+            >
+            <button type="button" id="addMemberButton">➕ メンバーを許可</button>
+        </div>
+        <div style="font-size:13px;color:#666;margin-top:6px;">
+            ※相手がGoogleログインに使うメールアドレスを入力してください。
+        </div>
+        <div id="memberList"></div>
     </div>
 
     <!-- RECメンバーだけ表示 -->
@@ -1839,6 +1911,13 @@
                         ? "（REC管理者）"
                         : "（RECメンバー）";
 
+                    if (currentUserIsAdmin) {
+                        document.getElementById("adminPanel").style.display = "block";
+                        await loadMembers();
+                    } else {
+                        document.getElementById("adminPanel").style.display = "none";
+                    }
+
                 } else {
 
                     console.log(
@@ -1850,6 +1929,7 @@
                     document.getElementById(
                         "controls"
                     ).style.display = "none";
+                    document.getElementById("adminPanel").style.display = "none";
                 }
 
 
@@ -1873,6 +1953,7 @@
                 document.getElementById(
                     "controls"
                 ).style.display = "none";
+                document.getElementById("adminPanel").style.display = "none";
 
 
                 console.log(
@@ -1880,6 +1961,179 @@
                 );
             }
         }
+
+
+
+
+        // =========================================
+        // 管理者：RECメンバー管理
+        // =========================================
+
+        async function loadMembers() {
+
+            if (!currentUserIsAdmin) {
+                return;
+            }
+
+            const { data, error } =
+                await supabaseClient
+                    .from("members")
+                    .select("email, role, created_at")
+                    .order("created_at", { ascending: true });
+
+            if (error) {
+                console.error("メンバー一覧取得エラー:", error);
+                document.getElementById("memberList").innerHTML =
+                    "<p>メンバー一覧を取得できませんでした。<br>" +
+                    error.message + "</p>";
+                return;
+            }
+
+            const memberList =
+                document.getElementById("memberList");
+
+            if (!data || data.length === 0) {
+                memberList.innerHTML = "<p>登録されているメンバーはいません。</p>";
+                return;
+            }
+
+            memberList.innerHTML = "<strong>現在のメンバー</strong>";
+
+            data.forEach(function(member) {
+
+                const row = document.createElement("div");
+                row.className = "member-row";
+
+                const email = document.createElement("span");
+                email.className = "member-email";
+                email.textContent = member.email;
+
+                const role = document.createElement("span");
+                role.className = "member-role";
+                role.textContent =
+                    member.role === "admin"
+                    ? "管理者"
+                    : "メンバー";
+
+                row.appendChild(email);
+                row.appendChild(role);
+
+                // 管理者はこの画面から削除しない
+                if (member.role !== "admin") {
+                    const removeButton = document.createElement("button");
+                    removeButton.type = "button";
+                    removeButton.className = "remove-member-button";
+                    removeButton.textContent = "🚫 許可を取り消す";
+
+                    removeButton.addEventListener("click", function() {
+                        removeMember(member.email);
+                    });
+
+                    row.appendChild(removeButton);
+                }
+
+                memberList.appendChild(row);
+            });
+        }
+
+
+        async function addMember() {
+
+            if (!currentUserIsAdmin) {
+                alert("メンバーを追加できるのは管理者だけです。");
+                return;
+            }
+
+            const input = document.getElementById("newMemberEmail");
+            const email = input.value.trim().toLowerCase();
+
+            if (!email) {
+                alert("Googleアカウントのメールアドレスを入力してください。");
+                return;
+            }
+
+            // 簡単なメールアドレス形式チェック
+            if (!email.includes("@")) {
+                alert("メールアドレスの形式を確認してください。");
+                return;
+            }
+
+            const { error } =
+                await supabaseClient
+                    .from("members")
+                    .insert({
+                        email: email,
+                        role: "member"
+                    });
+
+            if (error) {
+                console.error("メンバー追加エラー:", error);
+
+                if (error.code === "23505") {
+                    alert("このGoogleアカウントはすでにメンバーとして登録されています。");
+                } else {
+                    alert("メンバーの追加に失敗しました。\n" + error.message);
+                }
+
+                return;
+            }
+
+            alert(
+                email +
+                " をRECメンバーとして許可しました！\n\n" +
+                "この人はGoogleログイン後、マップを編集できるようになります。"
+            );
+
+            input.value = "";
+            await loadMembers();
+        }
+
+
+        async function removeMember(email) {
+
+            if (!currentUserIsAdmin) {
+                alert("メンバーの削除ができるのは管理者だけです。");
+                return;
+            }
+
+            const answer = confirm(
+                "「" + email + "」の編集権限を取り消しますか？\n\n" +
+                "取り消すと、このGoogleアカウントではマップを編集できなくなります。"
+            );
+
+            if (!answer) {
+                return;
+            }
+
+            const { error } =
+                await supabaseClient
+                    .from("members")
+                    .delete()
+                    .eq("email", email)
+                    .eq("role", "member");
+
+            if (error) {
+                console.error("メンバー削除エラー:", error);
+                alert("編集権限の取り消しに失敗しました。\n" + error.message);
+                return;
+            }
+
+            alert(email + " の編集権限を取り消しました。");
+            await loadMembers();
+        }
+
+
+        document
+            .getElementById("addMemberButton")
+            .addEventListener("click", addMember);
+
+        document
+            .getElementById("newMemberEmail")
+            .addEventListener("keydown", function(event) {
+                if (event.key === "Enter") {
+                    addMember();
+                }
+            });
 
 
         // =========================================
