@@ -9,284 +9,259 @@
           href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
     <style>
-    #map {
-        height: 600px;
-        width: 100%;
-    }
+        #map {
+            height: 600px;
+            width: 100%;
+        }
 
-    .emoji-marker {
-        font-size: 30px;
-        text-align: center;
-        line-height: 40px;
-        background: none;
-        border: none;
-    }
+        .emoji-marker {
+            font-size: 30px;
+            text-align: center;
+            line-height: 40px;
+            background: none;
+            border: none;
+        }
 
-    /* 編集モードのボタン */
-    #controls {
-        margin: 10px 0;
-    }
+        /* 編集モードのボタン */
+        #controls {
+            margin: 10px 0;
+        }
 
-    #editModeButton {
-        padding: 10px 16px;
-        font-size: 16px;
-        cursor: pointer;
-    }
+        #editModeButton {
+            padding: 10px 16px;
+            font-size: 16px;
+            cursor: pointer;
+        }
 
-    #modeText {
-        margin-left: 10px;
-        font-weight: bold;
-    }
+        #modeText {
+            margin-left: 10px;
+            font-weight: bold;
+        }
 
-    #formButtons {
-        margin-top: 15px;
-        text-align: right;
-    }
-
-    #formButtons button {
-        padding: 8px 14px;
-        margin-left: 5px;
-
-        cursor: pointer;
-    }
-
+        /* ログイン */
         #authArea {
-    margin: 10px 0;
-    padding: 10px;
-    background: #f5f5f5;
-    border-radius: 8px;
-}
+            margin: 10px 0;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
 
-#authArea button {
-    padding: 8px 14px;
-    margin-right: 8px;
-    cursor: pointer;
-}
+        #authArea button {
+            padding: 8px 14px;
+            margin-right: 8px;
+            cursor: pointer;
+        }
 
-#userInfo {
-    font-size: 14px;
-}
+        #userInfo {
+            font-size: 14px;
+        }
 
+        /* スポット追加フォーム */
+        #spotForm {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 350px;
+            max-width: 90%;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
 
-#editSpotForm {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 350px;
-    max-width: 90%;
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    z-index: 1000;
-}
+        #spotForm h2 {
+            margin-top: 0;
+        }
 
-#editSpotForm h2 {
-    margin-top: 0;
-}
+        #spotForm label {
+            display: block;
+            margin-top: 10px;
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
 
-#editSpotForm label {
-    display: block;
-    margin-top: 10px;
-    margin-bottom: 4px;
-    font-weight: bold;
-}
+        #spotForm input,
+        #spotForm select,
+        #spotForm textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 8px;
+            font-size: 14px;
+        }
 
-#editSpotForm input,
-#editSpotForm select,
-#editSpotForm textarea {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 8px;
-    font-size: 14px;
-}
+        #spotForm textarea {
+            height: 80px;
+            resize: vertical;
+        }
 
-#editSpotForm textarea {
-    height: 80px;
-    resize: vertical;
-}
+        #formButtons {
+            margin-top: 15px;
+            text-align: right;
+        }
 
-#editFormButtons {
-    margin-top: 15px;
-    text-align: right;
-}
+        #formButtons button {
+            padding: 8px 14px;
+            margin-left: 5px;
+            cursor: pointer;
+        }
 
-#editFormButtons button {
-    padding: 8px 14px;
-    margin-left: 5px;
-    cursor: pointer;
-}
-    
-</style>
-    
+        /* スポット編集フォーム */
+        #editSpotForm {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 350px;
+            max-width: 90%;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
+
+        #editSpotForm h2 {
+            margin-top: 0;
+        }
+
+        #editSpotForm label {
+            display: block;
+            margin-top: 10px;
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
+
+        #editSpotForm input,
+        #editSpotForm select,
+        #editSpotForm textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 8px;
+            font-size: 14px;
+        }
+
+        #editSpotForm textarea {
+            height: 80px;
+            resize: vertical;
+        }
+
+        #editFormButtons {
+            margin-top: 15px;
+            text-align: right;
+        }
+
+        #editFormButtons button {
+            padding: 8px 14px;
+            margin-left: 5px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 
 <body>
 
-   <h1>佐渡島マップ</h1>
+    <h1>佐渡島マップ</h1>
 
-
+    <!-- Googleログイン -->
     <div id="authArea">
-    <button id="loginButton">🔑 Googleでログイン</button>
-    <button id="logoutButton" style="display:none;">ログアウト</button>
-    <span id="userInfo"></span>
-</div>
-    
-<div id="controls" style="display:none;">
-    <button id="editModeButton">✏️ 編集モード</button>
-    <span id="modeText">現在：閲覧モード</span>
-</div>
+        <button id="loginButton">🔑 Googleでログイン</button>
+        <button id="logoutButton" style="display:none;">ログアウト</button>
+        <span id="userInfo"></span>
+    </div>
 
-<div id="map"></div>
+    <!-- RECメンバーだけ表示 -->
+    <div id="controls" style="display:none;">
+        <button id="editModeButton">✏️ 編集モード</button>
+        <span id="modeText">現在：閲覧モード</span>
+    </div>
 
- <!-- =========================================
-     スポット追加フォーム
-     ========================================= -->
+    <div id="map"></div>
 
-<div id="spotForm">
+    <!-- =========================================
+         スポット追加フォーム
+         ========================================= -->
+    <div id="spotForm">
 
+        <h2>📍 スポットを追加</h2>
+
+        <label for="spotName">スポット名</label>
+        <input type="text"
+               id="spotName"
+               placeholder="例：REC活動場所①">
+
+        <label for="spotCategory">カテゴリー</label>
+        <select id="spotCategory">
+            <option value="活動場所">活動場所</option>
+            <option value="宿泊地">宿泊地</option>
+            <option value="観光地">観光地</option>
+            <option value="飲食店">飲食店</option>
+            <option value="生活用品店">スーパーや生活用品店</option>
+        </select>
+
+        <label for="spotSubcategory">詳細カテゴリー</label>
+        <input type="text"
+               id="spotSubcategory"
+               placeholder="例：自然風景、博物館など">
+
+        <label for="spotAddress">住所</label>
+        <input type="text"
+               id="spotAddress"
+               placeholder="例：佐渡市〇〇地区">
+
+        <label for="spotActivity">活動内容・利用内容</label>
+        <textarea id="spotActivity"
+                  placeholder="例：棚田の整備、農作業"></textarea>
+
+        <label for="spotNote">メモ</label>
+        <textarea id="spotNote"
+                  placeholder="自由にメモを入力"></textarea>
+
+        <div id="formButtons">
+            <button type="button" id="cancelButton">キャンセル</button>
+            <button type="button" id="saveButton">保存</button>
+        </div>
+    </div>
+
+    <!-- =========================================
+         スポット編集フォーム
+         ========================================= -->
     <div id="editSpotForm">
 
-    <h2>✏️ スポットを編集</h2>
+        <h2>✏️ スポットを編集</h2>
 
-    <label for="editSpotName">スポット名</label>
-    <input type="text" id="editSpotName">
+        <label for="editSpotName">スポット名</label>
+        <input type="text" id="editSpotName">
 
-    <label for="editSpotCategory">カテゴリー</label>
-    <select id="editSpotCategory">
-        <option value="活動場所">活動場所</option>
-        <option value="宿泊地">宿泊地</option>
-        <option value="観光地">観光地</option>
-        <option value="飲食店">飲食店</option>
-        <option value="生活用品店">スーパーや生活用品店</option>
-    </select>
+        <label for="editSpotCategory">カテゴリー</label>
+        <select id="editSpotCategory">
+            <option value="活動場所">活動場所</option>
+            <option value="宿泊地">宿泊地</option>
+            <option value="観光地">観光地</option>
+            <option value="飲食店">飲食店</option>
+            <option value="生活用品店">スーパーや生活用品店</option>
+        </select>
 
-    <label for="editSpotSubcategory">詳細カテゴリー</label>
-    <input type="text" id="editSpotSubcategory">
+        <label for="editSpotSubcategory">詳細カテゴリー</label>
+        <input type="text" id="editSpotSubcategory">
 
-    <label for="editSpotAddress">住所</label>
-    <input type="text" id="editSpotAddress">
+        <label for="editSpotAddress">住所</label>
+        <input type="text" id="editSpotAddress">
 
-    <label for="editSpotActivity">活動内容・利用内容</label>
-    <textarea id="editSpotActivity"></textarea>
+        <label for="editSpotActivity">活動内容・利用内容</label>
+        <textarea id="editSpotActivity"></textarea>
 
-    <label for="editSpotNote">メモ</label>
-    <textarea id="editSpotNote"></textarea>
+        <label for="editSpotNote">メモ</label>
+        <textarea id="editSpotNote"></textarea>
 
-    <div id="editFormButtons">
-        <button type="button" id="editCancelButton">キャンセル</button>
-        <button type="button" id="editSaveButton">保存</button>
+        <div id="editFormButtons">
+            <button type="button" id="editCancelButton">キャンセル</button>
+            <button type="button" id="editSaveButton">保存</button>
+        </div>
     </div>
-
-</div>
-
-    <h2>📍 スポットを追加</h2>
-
-    <label for="spotName">
-        スポット名
-    </label>
-
-    <input
-        type="text"
-        id="spotName"
-        placeholder="例：REC活動場所①"
-    >
-
-
-    <label for="spotCategory">
-        カテゴリー
-    </label>
-
-    <select id="spotCategory">
-
-        <option value="活動場所">
-            活動場所
-        </option>
-
-        <option value="宿泊地">
-            宿泊地
-        </option>
-
-        <option value="観光地">
-            観光地
-        </option>
-
-        <option value="飲食店">
-            飲食店
-        </option>
-
-        <option value="生活用品店">
-            スーパーや生活用品店
-        </option>
-
-    </select>
-
-
-    <label for="spotSubcategory">
-        詳細カテゴリー
-    </label>
-
-    <input
-        type="text"
-        id="spotSubcategory"
-        placeholder="例：自然風景、博物館など"
-    >
-
-
-    <label for="spotAddress">
-        住所
-    </label>
-
-    <input
-        type="text"
-        id="spotAddress"
-        placeholder="例：佐渡市〇〇地区"
-    >
-
-
-    <label for="spotActivity">
-        活動内容・利用内容
-    </label>
-
-    <textarea
-        id="spotActivity"
-        placeholder="例：棚田の整備、農作業"
-    ></textarea>
-
-
-    <label for="spotNote">
-        メモ
-    </label>
-
-    <textarea
-        id="spotNote"
-        placeholder="自由にメモを入力"
-    ></textarea>
-
-
-    <div id="formButtons">
-
-        <button
-            type="button"
-            id="cancelButton"
-        >
-            キャンセル
-        </button>
-
-        <button
-            type="button"
-            id="saveButton"
-        >
-            保存
-        </button>
-
-    </div>
-
-</div>
-
-    
 
     <!-- Leaflet -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -300,28 +275,33 @@
         // Supabaseの設定
         // =========================================
 
-        const SUPABASE_URL = "https://cskyusrujmxhczcgkdke.supabase.co";
-        const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_T-lOBrjyPzfkPUI8mLbHVA_FIRyAp5X";
+        const SUPABASE_URL =
+            "https://cskyusrujmxhczcgkdke.supabase.co";
 
-      　 const supabaseClient = window.supabase.createClient(
-            SUPABASE_URL,
-            SUPABASE_PUBLISHABLE_KEY
+        const SUPABASE_PUBLISHABLE_KEY =
+            "sb_publishable_T-lOBrjyPzfkPUI8mLbHVA_FIRyAp5X";
 
-        );
+        const supabaseClient =
+            window.supabase.createClient(
+                SUPABASE_URL,
+                SUPABASE_PUBLISHABLE_KEY
+            );
 
 
         // =========================================
         // Leafletの地図を作成
         // =========================================
 
-        const map = L.map('map').setView([38.0, 138.4], 10);
+        const map =
+            L.map('map').setView([38.0, 138.4], 10);
 
 
         // OpenStreetMap
         L.tileLayer(
             'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
             {
-                attribution: '&copy; OpenStreetMap contributors'
+                attribution:
+                    '&copy; OpenStreetMap contributors'
             }
         ).addTo(map);
 
@@ -339,59 +319,68 @@
         };
 
 
-// =========================================
-// マーカーのアイコン
-// =========================================
+        // =========================================
+        // マーカーのアイコン
+        // =========================================
 
-const icons = {
+        const icons = {
 
-    "活動場所": L.divIcon({
-        html: "🌾",
-        className: "emoji-marker",
-        iconSize: [40, 40],
-        iconAnchor: [20, 20]
-    }),
+            "活動場所": L.divIcon({
+                html: "🌾",
+                className: "emoji-marker",
+                iconSize: [40, 40],
+                iconAnchor: [20, 20]
+            }),
 
-    "宿泊地": L.divIcon({
-        html: "🏠",
-        className: "emoji-marker",
-        iconSize: [40, 40],
-        iconAnchor: [20, 20]
-    }),
+            "宿泊地": L.divIcon({
+                html: "🏠",
+                className: "emoji-marker",
+                iconSize: [40, 40],
+                iconAnchor: [20, 20]
+            }),
 
-    "観光地": L.divIcon({
-        html: "📍",
-        className: "emoji-marker",
-        iconSize: [40, 40],
-        iconAnchor: [20, 20]
-    }),
+            "観光地": L.divIcon({
+                html: "📍",
+                className: "emoji-marker",
+                iconSize: [40, 40],
+                iconAnchor: [20, 20]
+            }),
 
-    "飲食店": L.divIcon({
-        html: "🍴",
-        className: "emoji-marker",
-        iconSize: [40, 40],
-        iconAnchor: [20, 20]
-    }),
+            "飲食店": L.divIcon({
+                html: "🍴",
+                className: "emoji-marker",
+                iconSize: [40, 40],
+                iconAnchor: [20, 20]
+            }),
 
-    "生活用品店": L.divIcon({
-        html: "🛒",
-        className: "emoji-marker",
-        iconSize: [40, 40],
-        iconAnchor: [20, 20]
-    })
-};
-
-
-// カテゴリーが見つからない場合に使う予備アイコン
-const defaultIcon = L.divIcon({
-    html: "📍",
-    className: "emoji-marker",
-    iconSize: [40, 40],
-    iconAnchor: [20, 20]
-});
+            "生活用品店": L.divIcon({
+                html: "🛒",
+                className: "emoji-marker",
+                iconSize: [40, 40],
+                iconAnchor: [20, 20]
+            })
+        };
 
 
-      
+        // カテゴリーが見つからない場合
+        const defaultIcon = L.divIcon({
+            html: "📍",
+            className: "emoji-marker",
+            iconSize: [40, 40],
+            iconAnchor: [20, 20]
+        });
+
+
+        // =========================================
+        // 編集関連の変数
+        // =========================================
+
+        let editMode = false;
+        let editingSpotId = null;
+
+        // RECメンバーかどうか
+        let currentUserIsMember = false;
+
 
         // =========================================
         // Supabaseからスポットを取得
@@ -399,15 +388,17 @@ const defaultIcon = L.divIcon({
 
         async function loadPlaces() {
 
-            const { data, error } = await supabaseClient
-                .from('spots')
-                .select('*');
+            const { data, error } =
+                await supabaseClient
+                    .from('spots')
+                    .select('*');
 
-
-            // エラーが発生した場合
             if (error) {
 
-                console.error("Supabaseエラー:", error);
+                console.error(
+                    "Supabaseエラー:",
+                    error
+                );
 
                 alert(
                     "スポット情報を取得できませんでした。\n" +
@@ -417,77 +408,112 @@ const defaultIcon = L.divIcon({
                 return;
             }
 
+            console.log(
+                "Supabaseから取得したデータ:",
+                data
+            );
 
-            console.log("Supabaseから取得したデータ:", data);
 
+            // 既存のマーカーを消す
+            Object.values(layers).forEach(
+                function(layer) {
+                    layer.clearLayers();
+                }
+            );
 
-            // =====================================
-            // 取得したスポットを地図に表示
-            // =====================================
 
             data.forEach(function(place) {
 
-                // マーカーのアイコンを取得
-const icon = icons[place.category];
+                // マーカーを作成
+                const marker = L.marker(
+                    [place.lat, place.lng],
+                    {
+                        icon:
+                            icons[place.category] ||
+                            defaultIcon
+                    }
+                );
 
-// マーカーを作成
-const marker = L.marker(
-    [place.lat, place.lng],
-    {
-        icon: icons[place.category] || defaultIcon
-    }
-);
 
-
+                // =====================================
                 // ポップアップ
-                marker.bindPopup(`
-    <div style="width:260px;">
-        <h2>${place.name}</h2>
+                // =====================================
 
-        <p>
-            <strong>カテゴリー：</strong>
-            ${place.category}
-        </p>
+                let popupHtml = `
+                    <div style="width:260px;">
 
-        ${place.subcategory
-            ? `<p><strong>分類：</strong>${place.subcategory}</p>`
-            : ""
-        }
+                        <h2>${place.name || ""}</h2>
 
-        <hr>
+                        <p>
+                            <strong>カテゴリー：</strong>
+                            ${place.category || ""}
+                        </p>
 
-        <p>
-            <strong>📍 所在地</strong><br>
-            ${place.address || ""}
-        </p>
+                        ${
+                            place.subcategory
+                            ?
+                            `<p>
+                                <strong>分類：</strong>
+                                ${place.subcategory}
+                            </p>`
+                            :
+                            ""
+                        }
 
-        <p>
-            <strong>🌾 活動内容</strong><br>
-            ${place.activity_history || ""}
-        </p>
+                        <hr>
 
-        <p>
-            <strong>📝 メモ</strong><br>
-            ${place.note || ""}
-        </p>
+                        <p>
+                            <strong>📍 所在地</strong><br>
+                            ${place.address || ""}
+                        </p>
 
-        <hr>
+                        <p>
+                            <strong>🌾 活動内容</strong><br>
+                            ${place.activity_history || ""}
+                        </p>
 
-        <p>${place.description || ""}</p>
+                        <p>
+                            <strong>📝 メモ</strong><br>
+                            ${place.note || ""}
+                        </p>
 
-        ${
-            editMode
-            ? `<button onclick="openEditForm(${place.id})">
-                ✏️ 編集
-              </button>`
-            : ""
-        }
+                        <hr>
 
-    </div>
-`);
+                        <p>
+                            ${place.description || ""}
+                        </p>
+                `;
 
 
+                // RECメンバーなら編集ボタンを表示
+                if (currentUserIsMember) {
+
+                    popupHtml += `
+                        <button
+                            onclick="openEditForm(${place.id})"
+                            style="
+                                padding:6px 10px;
+                                cursor:pointer;
+                            "
+                        >
+                            ✏️ 編集
+                        </button>
+                    `;
+                }
+
+
+                popupHtml += `
+                    </div>
+                `;
+
+
+                marker.bindPopup(popupHtml);
+
+
+                // =====================================
                 // カテゴリーに対応するレイヤーへ追加
+                // =====================================
+
                 if (layers[place.category]) {
 
                     marker.addTo(
@@ -496,9 +522,7 @@ const marker = L.marker(
 
                 } else {
 
-                    // 未登録カテゴリーの場合
                     marker.addTo(map);
-
                 }
 
             });
@@ -513,432 +537,726 @@ const marker = L.marker(
                     layer.addTo(map);
                 }
             );
-
-
-            // =====================================
-            // レイヤー切り替え
-            // =====================================
-
-            const overlayMaps = {
-
-                "🌾 活動場所":
-                    layers["活動場所"],
-
-                "🏠 宿泊地":
-                    layers["宿泊地"],
-
-                "📍 観光地":
-                    layers["観光地"],
-
-                "🍴 飲食店":
-                    layers["飲食店"],
-
-                "🛒 生活用品店":
-                    layers["生活用品店"]
-
-            };
-
-
-            L.control.layers(
-                null,
-                overlayMaps
-            ).addTo(map);
-
         }
 
 
+        // =========================================
+        // 編集モード
+        // =========================================
 
-    // =========================================
-    // Supabaseからデータを読み込む
-    // =========================================
-
-loadPlaces();
-
-
-// =========================================
-// 編集モード
-// =========================================
-
-let editMode = false;
-
-const editModeButton =
-    document.getElementById("editModeButton");
-
-const modeText =
-    document.getElementById("modeText");
-
-
-editModeButton.addEventListener("click", function() {
-
-    // 編集モードと閲覧モードを切り替える
-    editMode = !editMode;
-
-    if (editMode) {
-
-        editModeButton.textContent =
-            "👀 閲覧モードに戻す";
-
-        modeText.textContent =
-            "現在：編集モード";
-
-    } else {
-
-        editModeButton.textContent =
-            "✏️ 編集モード";
-
-        modeText.textContent =
-            "現在：閲覧モード";
-    }
-
-});
-
-
-// =========================================
-// 編集モードで地図をクリック
-// =========================================
-
-// =========================================
-// スポット追加用の変数
-// =========================================
-
-let newSpotLat = null;
-let newSpotLng = null;
-
-let temporaryMarker = null;
-
-
-// =========================================
-// 地図をクリック
-// =========================================
-
-map.on("click", function(e) {
-
-    // 閲覧モードなら何もしない
-    if (!editMode) {
-        return;
-    }
-
-
-    // クリックした場所の座標
-    newSpotLat = e.latlng.lat;
-    newSpotLng = e.latlng.lng;
-
-
-    console.log(
-        "新しいスポットの場所:",
-        newSpotLat,
-        newSpotLng
-    );
-
-
-    // =====================================
-    // 仮マーカーを表示
-    // =====================================
-
-    // すでに仮マーカーがあれば削除
-    if (temporaryMarker) {
-        map.removeLayer(temporaryMarker);
-    }
-
-
-    // 新しい仮マーカー
-    temporaryMarker = L.marker(
-        [newSpotLat, newSpotLng]
-    ).addTo(map);
-
-
-    temporaryMarker.bindPopup(
-        "ここにスポットを追加します"
-    ).openPopup();
-
-
-    // =====================================
-    // 入力フォームを表示
-    // =====================================
-
-    document.getElementById(
-        "spotForm"
-    ).style.display = "block";
-
-});
-
- // =========================================
-// キャンセルボタン
-// =========================================
-
-document.getElementById(
-    "cancelButton"
-).addEventListener(
-    "click",
-    function() {
-
-        // フォームを閉じる
-        document.getElementById(
-            "spotForm"
-        ).style.display = "none";
-
-
-        // 仮マーカーを削除
-        if (temporaryMarker) {
-
-            map.removeLayer(
-                temporaryMarker
+        const editModeButton =
+            document.getElementById(
+                "editModeButton"
             );
 
-            temporaryMarker = null;
-        }
+        const modeText =
+            document.getElementById(
+                "modeText"
+            );
 
 
-        // 座標をリセット
-        newSpotLat = null;
-        newSpotLng = null;
+        editModeButton.addEventListener(
+            "click",
+            function() {
 
-    }
-);
+                editMode = !editMode;
 
-    document.getElementById("saveButton").addEventListener("click", async function() {
+                if (editMode) {
 
-    // フォームから入力内容を取得
-    const name = document.getElementById("spotName").value;
-    const category = document.getElementById("spotCategory").value;
-    const subcategory = document.getElementById("spotSubcategory").value;
-    const address = document.getElementById("spotAddress").value;
-    const activity = document.getElementById("spotActivity").value;
-    const note = document.getElementById("spotNote").value;
+                    editModeButton.textContent =
+                        "👀 閲覧モードに戻す";
 
-    // スポット名が空の場合
-    if (!name) {
-        alert("スポット名を入力してください");
-        return;
-    }
+                    modeText.textContent =
+                        "現在：編集モード";
 
-    // 場所が選択されていない場合
-    if (newSpotLat === null || newSpotLng === null) {
-        alert("地図上の場所を選択してください");
-        return;
-    }
+                } else {
 
-    // Supabaseにデータを登録
-    const { data, error } = await supabaseClient
-        .from("spots")
-        .insert([
-            {
-                name: name,
-                lat: newSpotLat,
-                lng: newSpotLng,
-                category: category,
-                subcategory: subcategory,
-                address: address,
-                activity_history: activity,
-                note: note
+                    editModeButton.textContent =
+                        "✏️ 編集モード";
+
+                    modeText.textContent =
+                        "現在：閲覧モード";
+                }
             }
-        ])
-        .select();
-
-    // エラーが発生した場合
-    if (error) {
-        console.error("保存エラー:", error);
-        alert("保存に失敗しました。\n" + error.message);
-        return;
-    }
-
-    console.log("保存されたデータ:", data);
-
-    alert("スポットを保存しました！");
-
-    // フォームを閉じる
-    document.getElementById("spotForm").style.display = "none";
-
-    // 仮マーカーを削除
-    if (temporaryMarker) {
-        map.removeLayer(temporaryMarker);
-        temporaryMarker = null;
-    }
-
-    // 座標をリセット
-    newSpotLat = null;
-    newSpotLng = null;
-
-    // 入力フォームを空にする
-    document.getElementById("spotName").value = "";
-    document.getElementById("spotSubcategory").value = "";
-    document.getElementById("spotAddress").value = "";
-    document.getElementById("spotActivity").value = "";
-    document.getElementById("spotNote").value = "";
-
-    // ページを再読み込みして新しいスポットを表示
-    location.reload();
-});    
+        );
 
 
- // ==============================
-// Googleログイン
-// ==============================
+        // =========================================
+        // スポット追加用の変数
+        // =========================================
 
-const loginButton = document.getElementById("loginButton");
-const logoutButton = document.getElementById("logoutButton");
-const userInfo = document.getElementById("userInfo");
+        let newSpotLat = null;
+        let newSpotLng = null;
 
-// Googleログイン
-loginButton.addEventListener("click", async function() {
+        let temporaryMarker = null;
 
-    const { data, error } = await supabaseClient.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-            redirectTo: "https://ytrnht1222-cmd.github.io/sado_map/"
-        }
-    });
 
-    if (error) {
-        console.error("ログインエラー:", error);
-        alert("ログインに失敗しました。\n" + error.message);
-    }
-});
+        // =========================================
+        // 地図をクリック
+        // =========================================
 
-// ログアウト
-logoutButton.addEventListener("click", async function() {
+        map.on(
+            "click",
+            function(e) {
 
-    const { error } = await supabaseClient.auth.signOut();
+                // 閲覧モードなら何もしない
+                if (!editMode) {
+                    return;
+                }
 
-    if (error) {
-        console.error("ログアウトエラー:", error);
-        return;
-    }
+                // クリックした場所の座標
+                newSpotLat = e.latlng.lat;
+                newSpotLng = e.latlng.lng;
 
-    location.reload();
-});
 
-// 現在ログインしているユーザーを確認
-async function checkLogin() {
+                console.log(
+                    "新しいスポットの場所:",
+                    newSpotLat,
+                    newSpotLng
+                );
 
-    const {
-        data: { session }
-    } = await supabaseClient.auth.getSession();
 
-    if (session) {
+                // すでに仮マーカーがあれば削除
+                if (temporaryMarker) {
 
-        // ==========================
-        // Googleログイン済み
-        // ==========================
+                    map.removeLayer(
+                        temporaryMarker
+                    );
+                }
 
-        loginButton.style.display = "none";
-        logoutButton.style.display = "inline-block";
 
-        userInfo.textContent =
-            "ログイン中：" + session.user.email;
+                // 新しい仮マーカー
+                temporaryMarker =
+                    L.marker(
+                        [newSpotLat, newSpotLng]
+                    ).addTo(map);
 
-        console.log("ログインユーザー:", session.user);
 
-        // --------------------------
-        // RECメンバーか確認
-        // --------------------------
+                temporaryMarker
+                    .bindPopup(
+                        "ここにスポットを追加します"
+                    )
+                    .openPopup();
 
-        const { data: isMember, error } =
-            await supabaseClient.rpc("is_rec_member");
 
-        console.log("RECメンバー判定:", isMember);
-        console.log("判定エラー:", error);
+                // 入力フォームを表示
+                document.getElementById(
+                    "spotForm"
+                ).style.display = "block";
+            }
+        );
 
-        if (error) {
-            console.error("メンバー確認エラー:", error);
-            alert("メンバー確認に失敗しました");
-            return;
-        }
 
-       if (isMember) {
+        // =========================================
+        // スポット追加：キャンセル
+        // =========================================
 
-    console.log("RECメンバーです！");
+        document.getElementById(
+            "cancelButton"
+        ).addEventListener(
+            "click",
+            function() {
 
-    // 編集機能を表示
-    document.getElementById("controls").style.display = "block";
+                document.getElementById(
+                    "spotForm"
+                ).style.display = "none";
 
-} else {
 
-    console.log("RECメンバーではありません");
+                if (temporaryMarker) {
 
-    // 編集機能を非表示
-    document.getElementById("controls").style.display = "none";
-}
-    }  else {
+                    map.removeLayer(
+                        temporaryMarker
+                    );
 
-    loginButton.style.display = "inline-block";
-    logoutButton.style.display = "none";
+                    temporaryMarker = null;
+                }
 
-    userInfo.textContent = "";
 
-    // 編集機能を非表示
-    document.getElementById("controls").style.display = "none";
+                newSpotLat = null;
+                newSpotLng = null;
+            }
+        );
 
-    console.log("現在ログインしていません");
-}
-}
 
-checkLogin();
+        // =========================================
+        // スポット追加：保存
+        // =========================================
+
+        document.getElementById(
+            "saveButton"
+        ).addEventListener(
+            "click",
+            async function() {
+
+                const name =
+                    document.getElementById(
+                        "spotName"
+                    ).value;
+
+                const category =
+                    document.getElementById(
+                        "spotCategory"
+                    ).value;
+
+                const subcategory =
+                    document.getElementById(
+                        "spotSubcategory"
+                    ).value;
+
+                const address =
+                    document.getElementById(
+                        "spotAddress"
+                    ).value;
+
+                const activity =
+                    document.getElementById(
+                        "spotActivity"
+                    ).value;
+
+                const note =
+                    document.getElementById(
+                        "spotNote"
+                    ).value;
+
+
+                if (!name) {
+
+                    alert(
+                        "スポット名を入力してください"
+                    );
+
+                    return;
+                }
+
+
+                if (
+                    newSpotLat === null ||
+                    newSpotLng === null
+                ) {
+
+                    alert(
+                        "地図上の場所を選択してください"
+                    );
+
+                    return;
+                }
+
+
+                // Supabaseに登録
+                const { data, error } =
+                    await supabaseClient
+                        .from("spots")
+                        .insert([
+                            {
+                                name: name,
+                                lat: newSpotLat,
+                                lng: newSpotLng,
+                                category: category,
+                                subcategory: subcategory,
+                                address: address,
+                                activity_history: activity,
+                                note: note
+                            }
+                        ])
+                        .select();
+
+
+                if (error) {
+
+                    console.error(
+                        "保存エラー:",
+                        error
+                    );
+
+                    alert(
+                        "保存に失敗しました。\n" +
+                        error.message
+                    );
+
+                    return;
+                }
+
+
+                console.log(
+                    "保存されたデータ:",
+                    data
+                );
+
+                alert(
+                    "スポットを保存しました！"
+                );
+
+
+                document.getElementById(
+                    "spotForm"
+                ).style.display = "none";
+
+
+                if (temporaryMarker) {
+
+                    map.removeLayer(
+                        temporaryMarker
+                    );
+
+                    temporaryMarker = null;
+                }
+
+
+                newSpotLat = null;
+                newSpotLng = null;
+
+
+                // 入力フォームを空にする
+                document.getElementById(
+                    "spotName"
+                ).value = "";
+
+                document.getElementById(
+                    "spotSubcategory"
+                ).value = "";
+
+                document.getElementById(
+                    "spotAddress"
+                ).value = "";
+
+                document.getElementById(
+                    "spotActivity"
+                ).value = "";
+
+                document.getElementById(
+                    "spotNote"
+                ).value = "";
+
+
+                // 最新のデータを読み込む
+                await loadPlaces();
+            }
+        );
+
+
+        // =========================================
+        // 編集フォームを開く
+        // =========================================
 
         async function openEditForm(id) {
 
-    // Supabaseから対象スポットを取得
-    const { data, error } = await supabaseClient
-        .from("spots")
-        .select("*")
-        .eq("id", id)
-        .single();
-
-    if (error) {
-        console.error("スポット取得エラー:", error);
-        alert("スポット情報を取得できませんでした");
-        return;
-    }
-
-    // 編集中のIDを保存
-    editingSpotId = id;
-
-    // フォームに現在の情報を入れる
-    document.getElementById("editSpotName").value =
-        data.name || "";
-
-    document.getElementById("editSpotCategory").value =
-        data.category || "活動場所";
-
-    document.getElementById("editSpotSubcategory").value =
-        data.subcategory || "";
-
-    document.getElementById("editSpotAddress").value =
-        data.address || "";
-
-    document.getElementById("editSpotActivity").value =
-        data.activity_history || "";
-
-    document.getElementById("editSpotNote").value =
-        data.note || "";
-
-    // フォームを表示
-    document.getElementById("editSpotForm").style.display =
-        "block";
-}
-
-        document.getElementById("editCancelButton")
-    .addEventListener("click", function() {
-
-        document.getElementById("editSpotForm")
-            .style.display = "none";
-
-        editingSpotId = null;
-    });
+            const { data, error } =
+                await supabaseClient
+                    .from("spots")
+                    .select("*")
+                    .eq("id", id)
+                    .single();
 
 
+            if (error) {
 
-        document.getElementById("editCancelButton")
-    .addEventListener("click", function() {
+                console.error(
+                    "スポット取得エラー:",
+                    error
+                );
 
-        document.getElementById("editSpotForm")
-            .style.display = "none";
+                alert(
+                    "スポット情報を取得できませんでした"
+                );
 
-        editingSpotId = null;
-    });
-    
+                return;
+            }
 
-</script>
-        
+
+            editingSpotId = id;
+
+
+            // 現在の情報をフォームに入れる
+            document.getElementById(
+                "editSpotName"
+            ).value = data.name || "";
+
+            document.getElementById(
+                "editSpotCategory"
+            ).value =
+                data.category || "活動場所";
+
+            document.getElementById(
+                "editSpotSubcategory"
+            ).value =
+                data.subcategory || "";
+
+            document.getElementById(
+                "editSpotAddress"
+            ).value =
+                data.address || "";
+
+            document.getElementById(
+                "editSpotActivity"
+            ).value =
+                data.activity_history || "";
+
+            document.getElementById(
+                "editSpotNote"
+            ).value =
+                data.note || "";
+
+
+            // 編集フォームを表示
+            document.getElementById(
+                "editSpotForm"
+            ).style.display = "block";
+        }
+
+
+        // inline onclickから呼び出せるようにする
+        window.openEditForm = openEditForm;
+
+
+        // =========================================
+        // 編集：キャンセル
+        // =========================================
+
+        document.getElementById(
+            "editCancelButton"
+        ).addEventListener(
+            "click",
+            function() {
+
+                document.getElementById(
+                    "editSpotForm"
+                ).style.display = "none";
+
+                editingSpotId = null;
+            }
+        );
+
+
+        // =========================================
+        // 編集：保存
+        // =========================================
+
+        document.getElementById(
+            "editSaveButton"
+        ).addEventListener(
+            "click",
+            async function() {
+
+                if (editingSpotId === null) {
+
+                    alert(
+                        "編集するスポットが選択されていません"
+                    );
+
+                    return;
+                }
+
+
+                const name =
+                    document.getElementById(
+                        "editSpotName"
+                    ).value;
+
+                const category =
+                    document.getElementById(
+                        "editSpotCategory"
+                    ).value;
+
+                const subcategory =
+                    document.getElementById(
+                        "editSpotSubcategory"
+                    ).value;
+
+                const address =
+                    document.getElementById(
+                        "editSpotAddress"
+                    ).value;
+
+                const activity =
+                    document.getElementById(
+                        "editSpotActivity"
+                    ).value;
+
+                const note =
+                    document.getElementById(
+                        "editSpotNote"
+                    ).value;
+
+
+                if (!name) {
+
+                    alert(
+                        "スポット名を入力してください"
+                    );
+
+                    return;
+                }
+
+
+                // Supabaseのデータを更新
+                const { data, error } =
+                    await supabaseClient
+                        .from("spots")
+                        .update({
+                            name: name,
+                            category: category,
+                            subcategory: subcategory,
+                            address: address,
+                            activity_history: activity,
+                            note: note
+                        })
+                        .eq(
+                            "id",
+                            editingSpotId
+                        )
+                        .select();
+
+
+                if (error) {
+
+                    console.error(
+                        "更新エラー:",
+                        error
+                    );
+
+                    alert(
+                        "保存に失敗しました。\n" +
+                        error.message
+                    );
+
+                    return;
+                }
+
+
+                console.log(
+                    "更新されたデータ:",
+                    data
+                );
+
+                alert(
+                    "スポットを更新しました！"
+                );
+
+
+                document.getElementById(
+                    "editSpotForm"
+                ).style.display = "none";
+
+                editingSpotId = null;
+
+
+                // 最新のデータを読み込む
+                await loadPlaces();
+            }
+        );
+
+
+        // =========================================
+        // Googleログイン
+        // =========================================
+
+        const loginButton =
+            document.getElementById(
+                "loginButton"
+            );
+
+        const logoutButton =
+            document.getElementById(
+                "logoutButton"
+            );
+
+        const userInfo =
+            document.getElementById(
+                "userInfo"
+            );
+
+
+        loginButton.addEventListener(
+            "click",
+            async function() {
+
+                const { data, error } =
+                    await supabaseClient.auth
+                        .signInWithOAuth({
+                            provider: "google",
+                            options: {
+                                redirectTo:
+                                    "https://ytrnht1222-cmd.github.io/sado_map/"
+                            }
+                        });
+
+
+                if (error) {
+
+                    console.error(
+                        "ログインエラー:",
+                        error
+                    );
+
+                    alert(
+                        "ログインに失敗しました。\n" +
+                        error.message
+                    );
+                }
+            }
+        );
+
+
+        // =========================================
+        // ログアウト
+        // =========================================
+
+        logoutButton.addEventListener(
+            "click",
+            async function() {
+
+                const { error } =
+                    await supabaseClient.auth.signOut();
+
+
+                if (error) {
+
+                    console.error(
+                        "ログアウトエラー:",
+                        error
+                    );
+
+                    return;
+                }
+
+
+                location.reload();
+            }
+        );
+
+
+        // =========================================
+        // 現在ログインしているユーザーを確認
+        // =========================================
+
+        async function checkLogin() {
+
+            const {
+                data: { session }
+            } =
+                await supabaseClient.auth
+                    .getSession();
+
+
+            if (session) {
+
+                // Googleログイン済み
+                loginButton.style.display =
+                    "none";
+
+                logoutButton.style.display =
+                    "inline-block";
+
+                userInfo.textContent =
+                    "ログイン中：" +
+                    session.user.email;
+
+
+                console.log(
+                    "ログインユーザー:",
+                    session.user
+                );
+
+
+                // RECメンバーか確認
+                const {
+                    data: isMember,
+                    error
+                } =
+                    await supabaseClient.rpc(
+                        "is_rec_member"
+                    );
+
+
+                console.log(
+                    "RECメンバー判定:",
+                    isMember
+                );
+
+                console.log(
+                    "判定エラー:",
+                    error
+                );
+
+
+                if (error) {
+
+                    console.error(
+                        "メンバー確認エラー:",
+                        error
+                    );
+
+                    alert(
+                        "メンバー確認に失敗しました"
+                    );
+
+                    return;
+                }
+
+
+                if (isMember) {
+
+                    console.log(
+                        "RECメンバーです！"
+                    );
+
+                    currentUserIsMember = true;
+
+                    document.getElementById(
+                        "controls"
+                    ).style.display = "block";
+
+                } else {
+
+                    console.log(
+                        "RECメンバーではありません"
+                    );
+
+                    currentUserIsMember = false;
+
+                    document.getElementById(
+                        "controls"
+                    ).style.display = "none";
+                }
+
+
+            } else {
+
+                // ログアウト状態
+                loginButton.style.display =
+                    "inline-block";
+
+                logoutButton.style.display =
+                    "none";
+
+                userInfo.textContent = "";
+
+                currentUserIsMember = false;
+
+                document.getElementById(
+                    "controls"
+                ).style.display = "none";
+
+
+                console.log(
+                    "現在ログインしていません"
+                );
+            }
+        }
+
+
+        // =========================================
+        // 最初にログイン確認
+        // その後、スポットを読み込む
+        // =========================================
+
+        checkLogin().then(
+            function() {
+                loadPlaces();
+            }
+        );
+
+    </script>
+
 </body>
 </html>
