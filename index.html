@@ -9,26 +9,48 @@
           href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
     <style>
-        #map {
-            height: 600px;
-            width: 100%;
-        }
+    #map {
+        height: 600px;
+        width: 100%;
+    }
 
-        .emoji-marker {
-            font-size: 30px;
-            text-align: center;
-            line-height: 40px;
-            background: none;
-            border: none;
-        }
-    </style>
+    .emoji-marker {
+        font-size: 30px;
+        text-align: center;
+        line-height: 40px;
+        background: none;
+        border: none;
+    }
+
+    /* 編集モードのボタン */
+    #controls {
+        margin: 10px 0;
+    }
+
+    #editModeButton {
+        padding: 10px 16px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    #modeText {
+        margin-left: 10px;
+        font-weight: bold;
+    }
+</style>
+    
 </head>
 
 <body>
 
-    <h1>佐渡島マップ</h1>
+   <h1>佐渡島マップ</h1>
 
-    <div id="map"></div>
+<div id="controls">
+    <button id="editModeButton">✏️ 編集モード</button>
+    <span id="modeText">現在：閲覧モード</span>
+</div>
+
+<div id="map"></div>
 
     <!-- Leaflet -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -45,7 +67,7 @@
         const SUPABASE_URL = "https://cskyusrujmxhczcgkdke.supabase.co";
         const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_T-lOBrjyPzfkPUI8mLbHVA_FIRyAp5X";
 
-       const supabaseClient = window.supabase.createClient(
+      　 const supabaseClient = window.supabase.createClient(
             SUPABASE_URL,
             SUPABASE_PUBLISHABLE_KEY
 
@@ -292,13 +314,76 @@ const marker = L.marker(
         }
 
 
-        // =========================================
-        // Supabaseからデータを読み込む
-        // =========================================
 
-        loadPlaces();
+    // =========================================
+    // Supabaseからデータを読み込む
+    // =========================================
 
-    </script>
+loadPlaces();
 
+
+// =========================================
+// 編集モード
+// =========================================
+
+let editMode = false;
+
+const editModeButton =
+    document.getElementById("editModeButton");
+
+const modeText =
+    document.getElementById("modeText");
+
+
+editModeButton.addEventListener("click", function() {
+
+    // 編集モードと閲覧モードを切り替える
+    editMode = !editMode;
+
+    if (editMode) {
+
+        editModeButton.textContent =
+            "👀 閲覧モードに戻す";
+
+        modeText.textContent =
+            "現在：編集モード";
+
+    } else {
+
+        editModeButton.textContent =
+            "✏️ 編集モード";
+
+        modeText.textContent =
+            "現在：閲覧モード";
+    }
+
+});
+
+
+// =========================================
+// 編集モードで地図をクリック
+// =========================================
+
+map.on("click", function(e) {
+
+    // 閲覧モードなら何もしない
+    if (!editMode) {
+        return;
+    }
+
+    // クリックした場所の緯度・経度を取得
+    const lat = e.latlng.lat;
+    const lng = e.latlng.lng;
+
+    console.log(
+        "クリックした場所:",
+        lat,
+        lng
+    );
+
+});
+
+</script>
+        
 </body>
 </html>
