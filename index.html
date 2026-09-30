@@ -37,6 +37,18 @@
         margin-left: 10px;
         font-weight: bold;
     }
+
+    #formButtons {
+        margin-top: 15px;
+        text-align: right;
+    }
+
+    #formButtons button {
+        padding: 8px 14px;
+        margin-left: 5px;
+
+        cursor: pointer;
+    }
 </style>
     
 </head>
@@ -51,6 +63,118 @@
 </div>
 
 <div id="map"></div>
+
+    <!-- =========================================
+     スポット追加フォーム
+     ========================================= -->
+
+<div id="spotForm">
+
+    <h2>📍 スポットを追加</h2>
+
+    <label for="spotName">
+        スポット名
+    </label>
+
+    <input
+        type="text"
+        id="spotName"
+        placeholder="例：REC活動場所①"
+    >
+
+
+    <label for="spotCategory">
+        カテゴリー
+    </label>
+
+    <select id="spotCategory">
+
+        <option value="活動場所">
+            活動場所
+        </option>
+
+        <option value="宿泊地">
+            宿泊地
+        </option>
+
+        <option value="観光地">
+            観光地
+        </option>
+
+        <option value="飲食店">
+            飲食店
+        </option>
+
+        <option value="生活用品店">
+            スーパーや生活用品店
+        </option>
+
+    </select>
+
+
+    <label for="spotSubcategory">
+        詳細カテゴリー
+    </label>
+
+    <input
+        type="text"
+        id="spotSubcategory"
+        placeholder="例：自然風景、博物館など"
+    >
+
+
+    <label for="spotAddress">
+        住所
+    </label>
+
+    <input
+        type="text"
+        id="spotAddress"
+        placeholder="例：佐渡市〇〇地区"
+    >
+
+
+    <label for="spotActivity">
+        活動内容・利用内容
+    </label>
+
+    <textarea
+        id="spotActivity"
+        placeholder="例：棚田の整備、農作業"
+    ></textarea>
+
+
+    <label for="spotNote">
+        メモ
+    </label>
+
+    <textarea
+        id="spotNote"
+        placeholder="自由にメモを入力"
+    ></textarea>
+
+
+    <div id="formButtons">
+
+        <button
+            type="button"
+            id="cancelButton"
+        >
+            キャンセル
+        </button>
+
+        <button
+            type="button"
+            id="saveButton"
+        >
+            保存
+        </button>
+
+    </div>
+
+</div>
+
+    
 
     <!-- Leaflet -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -364,6 +488,20 @@ editModeButton.addEventListener("click", function() {
 // 編集モードで地図をクリック
 // =========================================
 
+// =========================================
+// スポット追加用の変数
+// =========================================
+
+let newSpotLat = null;
+let newSpotLng = null;
+
+let temporaryMarker = null;
+
+
+// =========================================
+// 地図をクリック
+// =========================================
+
 map.on("click", function(e) {
 
     // 閲覧モードなら何もしない
@@ -371,17 +509,84 @@ map.on("click", function(e) {
         return;
     }
 
-    // クリックした場所の緯度・経度を取得
-    const lat = e.latlng.lat;
-    const lng = e.latlng.lng;
+
+    // クリックした場所の座標
+    newSpotLat = e.latlng.lat;
+    newSpotLng = e.latlng.lng;
+
 
     console.log(
-        "クリックした場所:",
-        lat,
-        lng
+        "新しいスポットの場所:",
+        newSpotLat,
+        newSpotLng
     );
 
+
+    // =====================================
+    // 仮マーカーを表示
+    // =====================================
+
+    // すでに仮マーカーがあれば削除
+    if (temporaryMarker) {
+        map.removeLayer(temporaryMarker);
+    }
+
+
+    // 新しい仮マーカー
+    temporaryMarker = L.marker(
+        [newSpotLat, newSpotLng]
+    ).addTo(map);
+
+
+    temporaryMarker.bindPopup(
+        "ここにスポットを追加します"
+    ).openPopup();
+
+
+    // =====================================
+    // 入力フォームを表示
+    // =====================================
+
+    document.getElementById(
+        "spotForm"
+    ).style.display = "block";
+
 });
+
+ // =========================================
+// キャンセルボタン
+// =========================================
+
+document.getElementById(
+    "cancelButton"
+).addEventListener(
+    "click",
+    function() {
+
+        // フォームを閉じる
+        document.getElementById(
+            "spotForm"
+        ).style.display = "none";
+
+
+        // 仮マーカーを削除
+        if (temporaryMarker) {
+
+            map.removeLayer(
+                temporaryMarker
+            );
+
+            temporaryMarker = null;
+        }
+
+
+        // 座標をリセット
+        newSpotLat = null;
+        newSpotLng = null;
+
+    }
+);
+    
 
 </script>
         
