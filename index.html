@@ -173,6 +173,54 @@
             margin-left: 5px;
             cursor: pointer;
         }
+
+        .spot-gallery {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
+            margin: 8px 0 12px 0;
+        }
+
+        .spot-gallery img {
+            width: 100%;
+            height: 110px;
+            object-fit: cover;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .photo-preview {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .photo-preview-item {
+            position: relative;
+        }
+
+        .photo-preview-item img {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .photo-preview-item button {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            border: none;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            background: rgba(0,0,0,0.65);
+            color: white;
+            line-height: 20px;
+            padding: 0;
+        }
     </style>
 </head>
 
@@ -698,6 +746,165 @@
 
         let temporaryMarker = null;
 
+        // 選択中の写真
+        let selectedSpotImages = [];
+        let selectedEditImages = [];
+
+
+        // =========================================
+        // 写真選択・プレビュー
+        // =========================================
+
+        function renderPhotoPreview(files, previewId, selectedArray) {
+
+            const preview = document.getElementById(previewId);
+            preview.innerHTML = "";
+
+            files.forEach(function(file, index) {
+
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+
+                    const item = document.createElement("div");
+                    item.className = "photo-preview-item";
+
+                    item.innerHTML = `
+                        <img src="${e.target.result}" alt="選択した写真">
+                        <button type="button" title="この写真を外す">×</button>
+                    `;
+
+                    item.querySelector("button").addEventListener(
+                        "click",
+                        function() {
+                            selectedArray.splice(index, 1);
+                            renderPhotoPreview(
+                                selectedArray,
+                                previewId,
+                                selectedArray
+                            );
+                        }
+                    );
+
+                    preview.appendChild(item);
+                };
+
+                reader.readAsDataURL(file);
+            });
+        }
+
+
+        function handlePhotoSelection(inputId, previewId, selectedArray) {
+
+            const input = document.getElementById(inputId);
+
+            input.addEventListener("change", function() {
+
+                Array.from(input.files).forEach(function(file) {
+
+                    if (!file.type.startsWith("image/")) {
+                        alert("画像ファイルだけ選択してください");
+                        return;
+                    }
+
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert(file.name + " は5MBを超えています");
+                        return;
+                    }
+
+                    selectedArray.push(file);
+                });
+
+                input.value = "";
+
+                renderPhotoPreview(
+                    selectedArray,
+                    previewId,
+                    selectedArray
+                );
+            });
+        }
+
+
+        handlePhotoSelection(
+            "spotImages",
+            "spotPhotoPreview",
+            selectedSpotImages
+        );
+
+        handlePhotoSelection(
+            "editSpotImages",
+            "editPhotoPreview",
+            selectedEditImages
+        );
+
+
+        // =========================================
+        // Supabase Storageへ写真をアップロード
+        // =========================================
+
+        async function uploadSpotImages(spotId, files) {
+
+            const uploadedImages = [];
+
+            for (const file of files) {
+
+                const extension =
+                    file.name.split(".").pop();
+
+                const fileName =
+                    spotId +
+                    "/" +
+                    crypto.randomUUID() +
+                    "." +
+                    extension;
+
+                const { error: uploadError } =
+                    await supabaseClient.storage
+                        .from("spot-images")
+                        .upload(
+                            fileName,
+                            file,
+                            {
+                                cacheControl: "3600",
+                                upsert: false
+                            }
+                        );
+
+                if (uploadError) {
+                    throw uploadError;
+                }
+
+                const { data: publicUrlData } =
+                    supabaseClient.storage
+                        .from("spot-images")
+                        .getPublicUrl(fileName);
+
+                const imageUrl =
+                    publicUrlData.publicUrl;
+
+                const { error: dbError } =
+                    await supabaseClient
+                        .from("spot_images")
+                        .insert({
+                            spot_id: spotId,
+                            image_url: imageUrl,
+                            file_path: fileName
+                        });
+
+                if (dbError) {
+                    throw dbError;
+                }
+
+                uploadedImages.push({
+                    image_url: imageUrl,
+                    file_path: fileName
+                });
+            }
+
+            return uploadedImages;
+        }
+
 
         // =========================================
         // 地図をクリック
@@ -1152,6 +1359,12 @@
                     "editSpotForm"
                 ).style.display = "none";
 
+                selectedEditImages = [];
+
+                document.getElementById(
+                    "editPhotoPreview"
+                ).innerHTML = "";
+
                 editingSpotId = null;
             }
         );
@@ -1365,6 +1578,12 @@
                 document.getElementById(
                     "editSpotForm"
                 ).style.display = "none";
+
+                selectedEditImages = [];
+
+                document.getElementById(
+                    "editPhotoPreview"
+                ).innerHTML = "";
 
                 editingSpotId = null;
 
