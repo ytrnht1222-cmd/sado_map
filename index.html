@@ -66,6 +66,58 @@
 #userInfo {
     font-size: 14px;
 }
+
+
+#editSpotForm {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 350px;
+    max-width: 90%;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    z-index: 1000;
+}
+
+#editSpotForm h2 {
+    margin-top: 0;
+}
+
+#editSpotForm label {
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 4px;
+    font-weight: bold;
+}
+
+#editSpotForm input,
+#editSpotForm select,
+#editSpotForm textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px;
+    font-size: 14px;
+}
+
+#editSpotForm textarea {
+    height: 80px;
+    resize: vertical;
+}
+
+#editFormButtons {
+    margin-top: 15px;
+    text-align: right;
+}
+
+#editFormButtons button {
+    padding: 8px 14px;
+    margin-left: 5px;
+    cursor: pointer;
+}
     
 </style>
     
@@ -89,11 +141,46 @@
 
 <div id="map"></div>
 
-    <!-- =========================================
+ <!-- =========================================
      スポット追加フォーム
      ========================================= -->
 
 <div id="spotForm">
+
+    <div id="editSpotForm">
+
+    <h2>✏️ スポットを編集</h2>
+
+    <label for="editSpotName">スポット名</label>
+    <input type="text" id="editSpotName">
+
+    <label for="editSpotCategory">カテゴリー</label>
+    <select id="editSpotCategory">
+        <option value="活動場所">活動場所</option>
+        <option value="宿泊地">宿泊地</option>
+        <option value="観光地">観光地</option>
+        <option value="飲食店">飲食店</option>
+        <option value="生活用品店">スーパーや生活用品店</option>
+    </select>
+
+    <label for="editSpotSubcategory">詳細カテゴリー</label>
+    <input type="text" id="editSpotSubcategory">
+
+    <label for="editSpotAddress">住所</label>
+    <input type="text" id="editSpotAddress">
+
+    <label for="editSpotActivity">活動内容・利用内容</label>
+    <textarea id="editSpotActivity"></textarea>
+
+    <label for="editSpotNote">メモ</label>
+    <textarea id="editSpotNote"></textarea>
+
+    <div id="editFormButtons">
+        <button type="button" id="editCancelButton">キャンセル</button>
+        <button type="button" id="editSaveButton">保存</button>
+    </div>
+
+</div>
 
     <h2>📍 スポットを追加</h2>
 
@@ -354,53 +441,50 @@ const marker = L.marker(
 
                 // ポップアップ
                 marker.bindPopup(`
+    <div style="width:260px;">
+        <h2>${place.name}</h2>
 
-                    <div style="width:260px;">
+        <p>
+            <strong>カテゴリー：</strong>
+            ${place.category}
+        </p>
 
-                        <h2>${place.name}</h2>
+        ${place.subcategory
+            ? `<p><strong>分類：</strong>${place.subcategory}</p>`
+            : ""
+        }
 
-                        <p>
-                            <strong>カテゴリー：</strong>
-                            ${place.category}
-                        </p>
+        <hr>
 
-                        ${
-                            place.subcategory
-                            ?
-                            `<p>
-                                <strong>分類：</strong>
-                                ${place.subcategory}
-                            </p>`
-                            :
-                            ""
-                        }
+        <p>
+            <strong>📍 所在地</strong><br>
+            ${place.address || ""}
+        </p>
 
-                        <hr>
+        <p>
+            <strong>🌾 活動内容</strong><br>
+            ${place.activity_history || ""}
+        </p>
 
-                        <p>
-                            <strong>📍 所在地</strong><br>
-                            ${place.address}
-                        </p>
+        <p>
+            <strong>📝 メモ</strong><br>
+            ${place.note || ""}
+        </p>
 
-                        <p>
-                            <strong>🌾 活動内容</strong><br>
-                            ${place.activity_history}
-                        </p>
+        <hr>
 
-                        <p>
-                            <strong>📝 メモ</strong><br>
-                            ${place.note}
-                        </p>
+        <p>${place.description || ""}</p>
 
-                        <hr>
+        ${
+            editMode
+            ? `<button onclick="openEditForm(${place.id})">
+                ✏️ 編集
+              </button>`
+            : ""
+        }
 
-                        <p>
-                            ${place.description}
-                        </p>
-
-                    </div>
-
-                `);
+    </div>
+`);
 
 
                 // カテゴリーに対応するレイヤーへ追加
@@ -791,6 +875,67 @@ async function checkLogin() {
 
 checkLogin();
 
+        async function openEditForm(id) {
+
+    // Supabaseから対象スポットを取得
+    const { data, error } = await supabaseClient
+        .from("spots")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+    if (error) {
+        console.error("スポット取得エラー:", error);
+        alert("スポット情報を取得できませんでした");
+        return;
+    }
+
+    // 編集中のIDを保存
+    editingSpotId = id;
+
+    // フォームに現在の情報を入れる
+    document.getElementById("editSpotName").value =
+        data.name || "";
+
+    document.getElementById("editSpotCategory").value =
+        data.category || "活動場所";
+
+    document.getElementById("editSpotSubcategory").value =
+        data.subcategory || "";
+
+    document.getElementById("editSpotAddress").value =
+        data.address || "";
+
+    document.getElementById("editSpotActivity").value =
+        data.activity_history || "";
+
+    document.getElementById("editSpotNote").value =
+        data.note || "";
+
+    // フォームを表示
+    document.getElementById("editSpotForm").style.display =
+        "block";
+}
+
+        document.getElementById("editCancelButton")
+    .addEventListener("click", function() {
+
+        document.getElementById("editSpotForm")
+            .style.display = "none";
+
+        editingSpotId = null;
+    });
+
+
+
+        document.getElementById("editCancelButton")
+    .addEventListener("click", function() {
+
+        document.getElementById("editSpotForm")
+            .style.display = "none";
+
+        editingSpotId = null;
+    });
     
 
 </script>
