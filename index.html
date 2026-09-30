@@ -82,7 +82,7 @@
     <span id="userInfo"></span>
 </div>
     
-<div id="controls">
+<div id="controls" style="display:none;">
     <button id="editModeButton">✏️ 編集モード</button>
     <span id="modeText">現在：閲覧モード</span>
 </div>
@@ -761,25 +761,32 @@ async function checkLogin() {
             return;
         }
 
-        if (isMember) {
-            console.log("RECメンバーです！");
-        } else {
-            console.log("RECメンバーではありません");
-        }
+       if (isMember) {
 
-    } else {
+    console.log("RECメンバーです！");
 
-        // ==========================
-        // ログインしていない
-        // ==========================
+    // 編集機能を表示
+    document.getElementById("controls").style.display = "block";
 
-        loginButton.style.display = "inline-block";
-        logoutButton.style.display = "none";
+} else {
 
-        userInfo.textContent = "";
+    console.log("RECメンバーではありません");
 
-        console.log("現在ログインしていません");
-    }
+    // 編集機能を非表示
+    document.getElementById("controls").style.display = "none";
+}
+    } } else {
+
+    loginButton.style.display = "inline-block";
+    logoutButton.style.display = "none";
+
+    userInfo.textContent = "";
+
+    // 編集機能を非表示
+    document.getElementById("controls").style.display = "none";
+
+    console.log("現在ログインしていません");
+}
 }
 
 checkLogin();
