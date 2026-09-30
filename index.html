@@ -57,6 +57,13 @@
 
    <h1>佐渡島マップ</h1>
 
+
+    <div id="authArea">
+    <button id="loginButton">🔑 Googleでログイン</button>
+    <button id="logoutButton" style="display:none;">ログアウト</button>
+    <span id="userInfo"></span>
+</div>
+    
 <div id="controls">
     <button id="editModeButton">✏️ 編集モード</button>
     <span id="modeText">現在：閲覧モード</span>
@@ -660,6 +667,77 @@ document.getElementById(
     // ページを再読み込みして新しいスポットを表示
     location.reload();
 });    
+
+
+    // ==============================
+// Googleログイン
+// ==============================
+
+const loginButton = document.getElementById("loginButton");
+const logoutButton = document.getElementById("logoutButton");
+const userInfo = document.getElementById("userInfo");
+
+// Googleログイン
+loginButton.addEventListener("click", async function() {
+
+    const { data, error } = await supabaseClient.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+            redirectTo: "https://ytrnht1222-cmd.github.io/sado_map/"
+        }
+    });
+
+    if (error) {
+        console.error("ログインエラー:", error);
+        alert("ログインに失敗しました。\n" + error.message);
+    }
+});
+
+// ログアウト
+logoutButton.addEventListener("click", async function() {
+
+    const { error } = await supabaseClient.auth.signOut();
+
+    if (error) {
+        console.error("ログアウトエラー:", error);
+        return;
+    }
+
+    location.reload();
+});
+
+// 現在ログインしているユーザーを確認
+async function checkLogin() {
+
+    const {
+        data: { session }
+    } = await supabaseClient.auth.getSession();
+
+    if (session) {
+
+        // ログインしている場合
+        loginButton.style.display = "none";
+        logoutButton.style.display = "inline-block";
+
+        userInfo.textContent =
+            "ログイン中：" + session.user.email;
+
+        console.log("ログインユーザー:", session.user);
+
+    } else {
+
+        // ログインしていない場合
+        loginButton.style.display = "inline-block";
+        logoutButton.style.display = "none";
+
+        userInfo.textContent = "";
+
+        console.log("現在ログインしていません");
+    }
+}
+
+checkLogin();
+
     
 
 </script>
