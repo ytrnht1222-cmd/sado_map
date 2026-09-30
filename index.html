@@ -2,28 +2,25 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-
     <title>佐渡島マップ</title>
 
-    <!-- LeafletのCSS -->
+    <!-- Leaflet -->
     <link rel="stylesheet"
           href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
     <style>
-        /* 地図を表示する場所 */
         #map {
             height: 600px;
             width: 100%;
         }
 
-         /* 絵文字マーカー */
-    .emoji-marker {
-        font-size: 30px;
-        text-align: center;
-        line-height: 40px;
-        background: none;
-        border: none;
-    }
+        .emoji-marker {
+            font-size: 30px;
+            text-align: center;
+            line-height: 40px;
+            background: none;
+            border: none;
+        }
     </style>
 </head>
 
@@ -31,20 +28,37 @@
 
     <h1>佐渡島マップ</h1>
 
-    <!-- ここに地図が表示される -->
     <div id="map"></div>
 
-    <!-- Leaflet本体 -->
+    <!-- Leaflet -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <!-- 場所のデータ -->
-    <script src="places.js"></script>
-    
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <script>
-        // 佐渡島付近を中心に地図を作る
+
+        // =========================================
+        // Supabaseの設定
+        // =========================================
+
+        const SUPABASE_URL = "https://cskyusrujmxhczcgkdke.supabase.co";
+        const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_T-lOBrjyPzfkPUI8mLbHVA_FIRyAp5X";
+
+        const supabase = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_PUBLISHABLE_KEY
+        );
+
+
+        // =========================================
+        // Leafletの地図を作成
+        // =========================================
+
         const map = L.map('map').setView([38.0, 138.4], 10);
 
-        // OpenStreetMapの地図を読み込む
+
+        // OpenStreetMap
         L.tileLayer(
             'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
             {
@@ -52,152 +66,223 @@
             }
         ).addTo(map);
 
-        
+
+        // =========================================
+        // カテゴリーごとのレイヤー
+        // =========================================
+
+        const layers = {
+            "活動場所": L.layerGroup(),
+            "宿泊地": L.layerGroup(),
+            "観光地": L.layerGroup(),
+            "飲食店": L.layerGroup(),
+            "生活用品店": L.layerGroup()
+        };
 
 
-// ==============================
-// カテゴリーごとのレイヤーを作る
-// ==============================
+        // =========================================
+        // マーカーのアイコン
+        // =========================================
 
-const layers = {
-    "活動場所": L.layerGroup(),
-    "宿泊": L.layerGroup(),
-    "観光": L.layerGroup(),
-    "飲食店": L.layerGroup()
-};
+        const icons = {
 
+            "活動場所": L.divIcon({
+                html: "🌾",
+                className: "emoji-marker",
+                iconSize: [40, 40],
+                iconAnchor: [20, 20]
+            }),
 
-// ==============================
-// カテゴリーごとのマーカーアイコン
-// ==============================
+            "宿泊地": L.divIcon({
+                html: "🏠",
+                className: "emoji-marker",
+                iconSize: [40, 40],
+                iconAnchor: [20, 20]
+            }),
 
-const icons = {
+            "観光地": L.divIcon({
+                html: "📍",
+                className: "emoji-marker",
+                iconSize: [40, 40],
+                iconAnchor: [20, 20]
+            }),
 
-    "活動場所": L.divIcon({
-        html: "🌾",
-        className: "emoji-marker",
-        iconSize: [40, 40],
-        iconAnchor: [20, 20]
-    }),
+            "飲食店": L.divIcon({
+                html: "🍴",
+                className: "emoji-marker",
+                iconSize: [40, 40],
+                iconAnchor: [20, 20]
+            }),
 
-    "宿泊": L.divIcon({
-        html: "🏠",
-        className: "emoji-marker",
-        iconSize: [40, 40],
-        iconAnchor: [20, 20]
-    }),
-
-    "観光": L.divIcon({
-        html: "📍",
-        className: "emoji-marker",
-        iconSize: [40, 40],
-        iconAnchor: [20, 20]
-    }),
-
-    "飲食店": L.divIcon({
-        html: "🍴",
-        className: "emoji-marker",
-        iconSize: [40, 40],
-        iconAnchor: [20, 20]
-    })
-
-};
+            "生活用品店": L.divIcon({
+                html: "🛒",
+                className: "emoji-marker",
+                iconSize: [40, 40],
+                iconAnchor: [20, 20]
+            })
+        };
 
 
-// ==============================
-// 場所データからマーカーを作る
-// ==============================
+        // =========================================
+        // Supabaseからスポットを取得
+        // =========================================
 
-places.forEach(function(place) {
+        async function loadPlaces() {
 
-    const marker = L.marker(
-        [place.lat, place.lng],
-        {
-            icon: icons[place.category]
+            const { data, error } = await supabase
+                .from('spots')
+                .select('*');
+
+
+            // エラーが発生した場合
+            if (error) {
+
+                console.error("Supabaseエラー:", error);
+
+                alert(
+                    "スポット情報を取得できませんでした。\n" +
+                    error.message
+                );
+
+                return;
+            }
+
+
+            console.log("Supabaseから取得したデータ:", data);
+
+
+            // =====================================
+            // 取得したスポットを地図に表示
+            // =====================================
+
+            data.forEach(function(place) {
+
+                // マーカーを作成
+                const marker = L.marker(
+                    [place.lat, place.lng],
+                    {
+                        icon: icons[place.category]
+                    }
+                );
+
+
+                // ポップアップ
+                marker.bindPopup(`
+
+                    <div style="width:260px;">
+
+                        <h2>${place.name}</h2>
+
+                        <p>
+                            <strong>カテゴリー：</strong>
+                            ${place.category}
+                        </p>
+
+                        ${
+                            place.subcategory
+                            ?
+                            `<p>
+                                <strong>分類：</strong>
+                                ${place.subcategory}
+                            </p>`
+                            :
+                            ""
+                        }
+
+                        <hr>
+
+                        <p>
+                            <strong>📍 所在地</strong><br>
+                            ${place.address}
+                        </p>
+
+                        <p>
+                            <strong>🌾 活動内容</strong><br>
+                            ${place.activity_history}
+                        </p>
+
+                        <p>
+                            <strong>📝 メモ</strong><br>
+                            ${place.note}
+                        </p>
+
+                        <hr>
+
+                        <p>
+                            ${place.description}
+                        </p>
+
+                    </div>
+
+                `);
+
+
+                // カテゴリーに対応するレイヤーへ追加
+                if (layers[place.category]) {
+
+                    marker.addTo(
+                        layers[place.category]
+                    );
+
+                } else {
+
+                    // 未登録カテゴリーの場合
+                    marker.addTo(map);
+
+                }
+
+            });
+
+
+            // =====================================
+            // レイヤーを地図に追加
+            // =====================================
+
+            Object.values(layers).forEach(
+                function(layer) {
+                    layer.addTo(map);
+                }
+            );
+
+
+            // =====================================
+            // レイヤー切り替え
+            // =====================================
+
+            const overlayMaps = {
+
+                "🌾 活動場所":
+                    layers["活動場所"],
+
+                "🏠 宿泊地":
+                    layers["宿泊地"],
+
+                "📍 観光地":
+                    layers["観光地"],
+
+                "🍴 飲食店":
+                    layers["飲食店"],
+
+                "🛒 生活用品店":
+                    layers["生活用品店"]
+
+            };
+
+
+            L.control.layers(
+                null,
+                overlayMaps
+            ).addTo(map);
+
         }
-    );
 
 
-    // ==============================
-    // ポップアップ
-    // ==============================
+        // =========================================
+        // Supabaseからデータを読み込む
+        // =========================================
 
-    marker.bindPopup(`
-    <div style="width: 260px;">
+        loadPlaces();
 
-        <h2>${place.name}</h2>
-
-        <p>
-            <strong>カテゴリー：</strong>
-            ${place.category}
-        </p>
-
-        <hr>
-
-        <p>
-            <strong>📍 所在地</strong><br>
-            ${place.address}
-        </p>
-
-        <p>
-            <strong>🌾 活動内容</strong><br>
-            ${place.activity}
-        </p>
-
-        <p>
-            <strong>📅 最終活動</strong><br>
-            ${place.lastActivity}
-        </p>
-
-        <p>
-            <strong>📝 メモ</strong><br>
-            ${place.note}
-        </p>
-
-        <hr>
-
-        <p>
-            ${place.description}
-        </p>
-
-    </div>
-`);
-
-
-    // ==============================
-    // カテゴリーごとのレイヤーに追加
-    // ==============================
-
-    if (layers[place.category]) {
-        marker.addTo(layers[place.category]);
-    }
-
-});
-
-
-// ==============================
-// 最初は全部表示
-// ==============================
-
-Object.values(layers).forEach(function(layer) {
-    layer.addTo(map);
-});
-
-
-// ==============================
-// 右上にカテゴリー選択メニューを表示
-// ==============================
-
-const overlayMaps = {
-    "🌾 活動場所": layers["活動場所"],
-    "🏠 宿泊": layers["宿泊"],
-    "📍 観光": layers["観光"],
-    "🍴 飲食店": layers["飲食店"]
-};
-
-L.control.layers(null, overlayMaps).addTo(map);        
-
-      
     </script>
 
 </body>
