@@ -81,48 +81,59 @@
         };
 
 
-        // =========================================
-        // マーカーのアイコン
-        // =========================================
+// =========================================
+// マーカーのアイコン
+// =========================================
 
-        const icons = {
+const icons = {
 
-            "活動場所": L.divIcon({
-                html: "🌾",
-                className: "emoji-marker",
-                iconSize: [40, 40],
-                iconAnchor: [20, 20]
-            }),
+    "活動場所": L.divIcon({
+        html: "🌾",
+        className: "emoji-marker",
+        iconSize: [40, 40],
+        iconAnchor: [20, 20]
+    }),
 
-            "宿泊地": L.divIcon({
-                html: "🏠",
-                className: "emoji-marker",
-                iconSize: [40, 40],
-                iconAnchor: [20, 20]
-            }),
+    "宿泊地": L.divIcon({
+        html: "🏠",
+        className: "emoji-marker",
+        iconSize: [40, 40],
+        iconAnchor: [20, 20]
+    }),
 
-            "観光地": L.divIcon({
-                html: "📍",
-                className: "emoji-marker",
-                iconSize: [40, 40],
-                iconAnchor: [20, 20]
-            }),
+    "観光地": L.divIcon({
+        html: "📍",
+        className: "emoji-marker",
+        iconSize: [40, 40],
+        iconAnchor: [20, 20]
+    }),
 
-            "飲食店": L.divIcon({
-                html: "🍴",
-                className: "emoji-marker",
-                iconSize: [40, 40],
-                iconAnchor: [20, 20]
-            }),
+    "飲食店": L.divIcon({
+        html: "🍴",
+        className: "emoji-marker",
+        iconSize: [40, 40],
+        iconAnchor: [20, 20]
+    }),
 
-            "生活用品店": L.divIcon({
-                html: "🛒",
-                className: "emoji-marker",
-                iconSize: [40, 40],
-                iconAnchor: [20, 20]
-            })
-        };
+    "生活用品店": L.divIcon({
+        html: "🛒",
+        className: "emoji-marker",
+        iconSize: [40, 40],
+        iconAnchor: [20, 20]
+    })
+};
 
+
+// カテゴリーが見つからない場合に使う予備アイコン
+const defaultIcon = L.divIcon({
+    html: "📍",
+    className: "emoji-marker",
+    iconSize: [40, 40],
+    iconAnchor: [20, 20]
+});
+
+
+      
 
         // =========================================
         // Supabaseからスポットを取得
@@ -158,13 +169,16 @@
 
             data.forEach(function(place) {
 
-                // マーカーを作成
-                const marker = L.marker(
-                    [place.lat, place.lng],
-                    {
-                        icon: icons[place.category]
-                    }
-                );
+                // マーカーのアイコンを取得
+const icon = icons[place.category];
+
+// マーカーを作成
+const marker = L.marker(
+    [place.lat, place.lng],
+    {
+        icon: icons[place.category] || defaultIcon
+    }
+);
 
 
                 // ポップアップ
