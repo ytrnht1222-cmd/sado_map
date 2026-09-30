@@ -616,8 +616,8 @@
         let newSpotLng = null;
         let temporaryMarker = null;
 
-        let selectedSpotImages = [];
-        let selectedEditImages = [];
+        let selectedSpotImages.length = 0;
+        let selectedEditImages.length = 0;
         let existingEditImages = [];
         let imagesToDelete = [];
 
@@ -1165,7 +1165,7 @@
                 .bindPopup("ここにスポットを追加します")
                 .openPopup();
 
-            selectedSpotImages = [];
+            selectedSpotImages.length = 0;
             document.getElementById("spotPhotoPreview").innerHTML = "";
 
             document.getElementById("spotForm").style.display = "block";
@@ -1188,7 +1188,7 @@
 
             newSpotLat = null;
             newSpotLng = null;
-            selectedSpotImages = [];
+            selectedSpotImages.length = 0;
             document.getElementById("spotPhotoPreview").innerHTML = "";
             document.getElementById("spotImages").value = "";
             document.getElementById("spotName").value = "";
@@ -1286,7 +1286,7 @@
             }
 
             editingSpotId = id;
-            selectedEditImages = [];
+            selectedEditImages.length = 0;
             imagesToDelete = [];
 
             document.getElementById("editSpotName").value = data.name || "";
@@ -1371,7 +1371,7 @@
             document.getElementById("existingEditPhotoPreview").innerHTML = "";
             document.getElementById("legacyEditPhotoPreview").innerHTML = "";
 
-            selectedEditImages = [];
+            selectedEditImages.length = 0;
             existingEditImages = [];
             imagesToDelete = [];
             editingSpotId = null;
