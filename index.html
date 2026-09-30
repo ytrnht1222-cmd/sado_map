@@ -733,7 +733,10 @@ async function checkLogin() {
 
     if (session) {
 
-        // ログインしている場合
+        // ==========================
+        // Googleログイン済み
+        // ==========================
+
         loginButton.style.display = "none";
         logoutButton.style.display = "inline-block";
 
@@ -742,9 +745,34 @@ async function checkLogin() {
 
         console.log("ログインユーザー:", session.user);
 
+        // --------------------------
+        // RECメンバーか確認
+        // --------------------------
+
+        const { data: isMember, error } =
+            await supabaseClient.rpc("is_rec_member");
+
+        console.log("RECメンバー判定:", isMember);
+        console.log("判定エラー:", error);
+
+        if (error) {
+            console.error("メンバー確認エラー:", error);
+            alert("メンバー確認に失敗しました");
+            return;
+        }
+
+        if (isMember) {
+            console.log("RECメンバーです！");
+        } else {
+            console.log("RECメンバーではありません");
+        }
+
     } else {
 
-        // ログインしていない場合
+        // ==========================
+        // ログインしていない
+        // ==========================
+
         loginButton.style.display = "inline-block";
         logoutButton.style.display = "none";
 
