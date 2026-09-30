@@ -42,12 +42,13 @@
         // Supabaseの設定
         // =========================================
 
-        const SUPABASE_URL = "https://cskysurujmxhczcgkdke.supabase.co";
+        const SUPABASE_URL = "https://cskyusrujmxhczcgkdke.supabase.co";
         const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_T-lOBrjyPzfkPUI8mLbHVA_FIRyAp5X";
 
-        const supabase = window.supabase.createClient(
+       const supabaseClient = window.supabase.createClient(
             SUPABASE_URL,
             SUPABASE_PUBLISHABLE_KEY
+
         );
 
 
@@ -129,7 +130,7 @@
 
         async function loadPlaces() {
 
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('spots')
                 .select('*');
 
