@@ -586,6 +586,80 @@ document.getElementById(
 
     }
 );
+
+    document.getElementById("saveButton").addEventListener("click", async function() {
+
+    // フォームから入力内容を取得
+    const name = document.getElementById("spotName").value;
+    const category = document.getElementById("spotCategory").value;
+    const subcategory = document.getElementById("spotSubcategory").value;
+    const address = document.getElementById("spotAddress").value;
+    const activity = document.getElementById("spotActivity").value;
+    const note = document.getElementById("spotNote").value;
+
+    // スポット名が空の場合
+    if (!name) {
+        alert("スポット名を入力してください");
+        return;
+    }
+
+    // 場所が選択されていない場合
+    if (newSpotLat === null || newSpotLng === null) {
+        alert("地図上の場所を選択してください");
+        return;
+    }
+
+    // Supabaseにデータを登録
+    const { data, error } = await supabaseClient
+        .from("spots")
+        .insert([
+            {
+                name: name,
+                lat: newSpotLat,
+                lng: newSpotLng,
+                category: category,
+                subcategory: subcategory,
+                address: address,
+                activity_history: activity,
+                note: note
+            }
+        ])
+        .select();
+
+    // エラーが発生した場合
+    if (error) {
+        console.error("保存エラー:", error);
+        alert("保存に失敗しました。\n" + error.message);
+        return;
+    }
+
+    console.log("保存されたデータ:", data);
+
+    alert("スポットを保存しました！");
+
+    // フォームを閉じる
+    document.getElementById("spotForm").style.display = "none";
+
+    // 仮マーカーを削除
+    if (temporaryMarker) {
+        map.removeLayer(temporaryMarker);
+        temporaryMarker = null;
+    }
+
+    // 座標をリセット
+    newSpotLat = null;
+    newSpotLng = null;
+
+    // 入力フォームを空にする
+    document.getElementById("spotName").value = "";
+    document.getElementById("spotSubcategory").value = "";
+    document.getElementById("spotAddress").value = "";
+    document.getElementById("spotActivity").value = "";
+    document.getElementById("spotNote").value = "";
+
+    // ページを再読み込みして新しいスポットを表示
+    location.reload();
+});    
     
 
 </script>
