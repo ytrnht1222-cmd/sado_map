@@ -2,13 +2,22 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>佐渡島マップ</title>
 
-    <!-- Leaflet -->
-    <link rel="stylesheet"
-          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
     <style>
+        body {
+            margin: 0;
+            padding: 16px;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
         #map {
             height: 600px;
             width: 100%;
@@ -22,76 +31,63 @@
             border: none;
         }
 
-        /* 編集モードのボタン */
-        #controls {
+        #authArea,
+        #adminPanel {
             margin: 10px 0;
-        }
-
-        #editModeButton {
-            padding: 10px 16px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        #modeText {
-            margin-left: 10px;
-            font-weight: bold;
-        }
-
-        /* ログイン */
-        #authArea {
-            margin: 10px 0;
-            padding: 10px;
-            background: #f5f5f5;
+            padding: 12px;
             border-radius: 8px;
         }
 
-        #authArea button {
-            padding: 8px 14px;
-            margin-right: 8px;
+        #authArea {
+            background: #f5f5f5;
+        }
+
+        #adminPanel {
+            display: none;
+            background: #fff7e6;
+            border: 1px solid #f0c36d;
+        }
+
+        #authArea button,
+        #adminPanel button,
+        #controls button,
+        #categoryFilters button,
+        #formButtons button,
+        #editFormButtons button {
+            padding: 8px 12px;
+            margin-right: 6px;
             cursor: pointer;
         }
 
-        #userInfo {
+        #userInfo,
+        #roleInfo {
+            margin-left: 6px;
             font-size: 14px;
         }
 
-        /* 管理者パネル */
-        #adminPanel {
-            display: none;
-            margin: 10px 0;
-            padding: 15px;
-            background: #fff7e6;
-            border: 1px solid #f0c36d;
-            border-radius: 10px;
+        #memberForm {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
         }
 
-        #adminPanel h3 {
-            margin-top: 0;
-        }
-
-        #adminPanel input {
+        #newMemberEmail {
             padding: 8px;
-            width: 280px;
-            max-width: 90%;
+            width: 300px;
+            max-width: 100%;
             box-sizing: border-box;
         }
 
-        #adminPanel button {
-            padding: 8px 12px;
-            margin-left: 5px;
-            cursor: pointer;
-        }
-
         #memberList {
-            margin-top: 12px;
+            margin-top: 14px;
         }
 
         .member-row {
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 7px 0;
+            padding: 8px 0;
             border-bottom: 1px solid #ddd;
         }
 
@@ -103,33 +99,38 @@
         .member-role {
             font-size: 13px;
             color: #666;
+            white-space: nowrap;
         }
 
-        .remove-member-button {
-            margin-left: auto !important;
+        #modeText {
+            font-weight: bold;
         }
 
-        /* スポット追加フォーム */
-        #spotForm {
+        #categoryFilters {
+            margin: 10px 0;
+        }
+
+        #spotForm,
+        #editSpotForm {
             display: none;
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 350px;
-            max-width: 90%;
+            width: 420px;
+            max-width: 92vw;
+            max-height: 88vh;
+            overflow-y: auto;
             background: white;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.3);
             z-index: 1000;
+            box-sizing: border-box;
         }
 
-        #spotForm h2 {
-            margin-top: 0;
-        }
-
-        #spotForm label {
+        #spotForm label,
+        #editSpotForm label {
             display: block;
             margin-top: 10px;
             margin-bottom: 4px;
@@ -138,70 +139,7 @@
 
         #spotForm input,
         #spotForm select,
-        #spotForm textarea {
-            width: 100%;
-            box-sizing: border-box;
-            padding: 8px;
-            font-size: 14px;
-        }
-
-        #spotForm textarea {
-            height: 80px;
-            resize: vertical;
-        }
-
-        .photo-preview {
-            width: 100%;
-            max-height: 220px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-top: 8px;
-        }
-
-        .photo-help {
-            font-size: 12px;
-            color: #666;
-            margin-top: 4px;
-        }
-
-        #formButtons {
-            margin-top: 15px;
-            text-align: right;
-        }
-
-        #formButtons button {
-            padding: 8px 14px;
-            margin-left: 5px;
-            cursor: pointer;
-        }
-
-        /* スポット編集フォーム */
-        #editSpotForm {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 350px;
-            max-width: 90%;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            z-index: 1000;
-        }
-
-        #editSpotForm h2 {
-            margin-top: 0;
-        }
-
-        #editSpotForm label {
-            display: block;
-            margin-top: 10px;
-            margin-bottom: 4px;
-            font-weight: bold;
-        }
-
+        #spotForm textarea,
         #editSpotForm input,
         #editSpotForm select,
         #editSpotForm textarea {
@@ -211,27 +149,29 @@
             font-size: 14px;
         }
 
+        #spotForm textarea,
         #editSpotForm textarea {
-            height: 80px;
+            min-height: 80px;
             resize: vertical;
         }
 
+        .photo-help {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        #formButtons,
         #editFormButtons {
             margin-top: 15px;
             text-align: right;
         }
 
-        #editFormButtons button {
-            padding: 8px 14px;
-            margin-left: 5px;
-            cursor: pointer;
-        }
-
         .spot-gallery {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 6px;
-            margin: 8px 0 12px 0;
+            margin: 8px 0 12px;
         }
 
         .spot-gallery img {
@@ -244,7 +184,7 @@
 
         .photo-preview {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 6px;
             margin-top: 8px;
         }
@@ -255,24 +195,48 @@
 
         .photo-preview-item img {
             width: 100%;
-            height: 80px;
+            height: 90px;
             object-fit: cover;
-            border-radius: 5px;
+            border-radius: 6px;
+            display: block;
         }
 
         .photo-preview-item button {
             position: absolute;
-            top: 2px;
-            right: 2px;
+            top: 4px;
+            right: 4px;
             border: none;
             border-radius: 50%;
-            width: 22px;
-            height: 22px;
+            width: 24px;
+            height: 24px;
             cursor: pointer;
             background: rgba(0,0,0,0.65);
             color: white;
             line-height: 20px;
             padding: 0;
+        }
+
+        .existing-photo-item {
+            position: relative;
+        }
+
+        .existing-photo-item img {
+            width: 100%;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 6px;
+            display: block;
+        }
+
+        .existing-photo-item button {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+        }
+
+        .small-note {
+            font-size: 12px;
+            color: #666;
         }
     </style>
 </head>
@@ -283,37 +247,42 @@
 
     <!-- Googleログイン -->
     <div id="authArea">
-        <button id="loginButton">🔑 Googleでログイン</button>
-        <button id="logoutButton" style="display:none;">ログアウト</button>
-        <span id="userInfo"></span><span id="roleInfo" style="margin-left:10px;"></span>
+        <button id="loginButton" type="button">🔑 Googleでログイン</button>
+        <button id="logoutButton" type="button" style="display:none;">ログアウト</button>
+        <span id="userInfo"></span>
+        <span id="roleInfo"></span>
     </div>
 
-
-    <!-- REC管理者だけ表示されるメンバー管理画面 -->
+    <!-- REC管理者だけ表示 -->
     <div id="adminPanel">
         <h3>👑 RECメンバー管理</h3>
-        <div>
+
+        <div id="memberForm">
             <span>Googleアカウントのメールアドレス：</span>
             <input
                 type="email"
                 id="newMemberEmail"
                 placeholder="example@gmail.com"
             >
-            <button type="button" id="addMemberButton">➕ メンバーを許可</button>
+            <button id="addMemberButton" type="button">➕ メンバーを許可</button>
+            <button id="reloadMembersButton" type="button">🔄 更新</button>
         </div>
-        <div style="font-size:13px;color:#666;margin-top:6px;">
-            ※相手がGoogleログインに使うメールアドレスを入力してください。
+
+        <div class="small-note" style="margin-top:6px;">
+            ※相手がGoogleログインに使うメールアドレスと同じものを入力してください。
         </div>
+
         <div id="memberList"></div>
     </div>
 
     <!-- RECメンバーだけ表示 -->
-    <div id="controls" style="display:none;">
-        <button id="editModeButton">✏️ 編集モード</button>
+    <div id="controls" style="display:none; margin:10px 0;">
+        <button id="editModeButton" type="button">✏️ 編集モード</button>
         <span id="modeText">現在：閲覧モード</span>
     </div>
 
-    <div id="categoryFilters" style="margin:10px 0;">
+    <!-- カテゴリー絞り込み -->
+    <div id="categoryFilters">
         <strong>表示：</strong>
         <button type="button" onclick="showAllLayers()">すべて</button>
         <button type="button" onclick="showCategory('活動場所')">🌾 活動場所</button>
@@ -325,17 +294,12 @@
 
     <div id="map"></div>
 
-    <!-- =========================================
-         スポット追加フォーム
-         ========================================= -->
+    <!-- スポット追加フォーム -->
     <div id="spotForm">
-
         <h2>📍 スポットを追加</h2>
 
         <label for="spotName">スポット名</label>
-        <input type="text"
-               id="spotName"
-               placeholder="例：REC活動場所①">
+        <input type="text" id="spotName" placeholder="例：REC活動場所①">
 
         <label for="spotCategory">カテゴリー</label>
         <select id="spotCategory">
@@ -343,32 +307,25 @@
             <option value="宿泊地">宿泊地</option>
             <option value="観光地">観光地</option>
             <option value="飲食店">飲食店</option>
-            <option value="生活用品店">スーパーや生活用品店</option>
+            <option value="生活用品店">生活用品店</option>
         </select>
 
         <label for="spotSubcategory">詳細カテゴリー</label>
-        <input type="text"
-               id="spotSubcategory"
-               placeholder="例：自然風景、博物館など">
+        <input type="text" id="spotSubcategory" placeholder="例：自然風景、博物館など">
 
         <label for="spotAddress">住所</label>
-        <input type="text"
-               id="spotAddress"
-               placeholder="例：佐渡市〇〇地区">
+        <input type="text" id="spotAddress" placeholder="例：佐渡市〇〇地区">
 
         <label for="spotActivity">活動内容・利用内容</label>
-        <textarea id="spotActivity"
-                  placeholder="例：棚田の整備、農作業"></textarea>
+        <textarea id="spotActivity" placeholder="例：棚田の整備、農作業"></textarea>
 
         <label for="spotNote">メモ</label>
-        <textarea id="spotNote"
-                  placeholder="自由にメモを入力"></textarea>
+        <textarea id="spotNote" placeholder="自由にメモを入力"></textarea>
 
-        <label for="spotImage">写真</label>
-        <input type="file"
-               id="spotImage"
-               accept="image/*">
-        <div class="photo-help">JPG・PNGなど、5MB以下を推奨</div>
+        <label for="spotImages">写真（複数選択可能）</label>
+        <input type="file" id="spotImages" accept="image/*" multiple>
+        <div class="photo-help">JPG・PNGなど。1枚5MB以下。複数枚選択できます。</div>
+        <div id="spotPhotoPreview" class="photo-preview"></div>
 
         <div id="formButtons">
             <button type="button" id="cancelButton">キャンセル</button>
@@ -376,11 +333,8 @@
         </div>
     </div>
 
-    <!-- =========================================
-         スポット編集フォーム
-         ========================================= -->
+    <!-- スポット編集フォーム -->
     <div id="editSpotForm">
-
         <h2>✏️ スポットを編集</h2>
 
         <label for="editSpotName">スポット名</label>
@@ -392,7 +346,7 @@
             <option value="宿泊地">宿泊地</option>
             <option value="観光地">観光地</option>
             <option value="飲食店">飲食店</option>
-            <option value="生活用品店">スーパーや生活用品店</option>
+            <option value="生活用品店">生活用品店</option>
         </select>
 
         <label for="editSpotSubcategory">詳細カテゴリー</label>
@@ -407,12 +361,14 @@
         <label for="editSpotNote">メモ</label>
         <textarea id="editSpotNote"></textarea>
 
-        <label for="editSpotImage">写真を変更</label>
-        <input type="file"
-               id="editSpotImage"
-               accept="image/*">
-        <div class="photo-help">新しい写真を選択した場合のみ変更されます</div>
-        <div id="editPhotoPreview"></div>
+        <label>現在の写真</label>
+        <div id="existingEditPhotoPreview" class="photo-preview"></div>
+        <div id="legacyEditPhotoPreview"></div>
+
+        <label for="editSpotImages">写真を追加（複数選択可能）</label>
+        <input type="file" id="editSpotImages" accept="image/*" multiple>
+        <div class="photo-help">既存の写真はそのまま残り、新しく選んだ写真が追加されます。1枚5MB以下。</div>
+        <div id="editPhotoPreview" class="photo-preview"></div>
 
         <div id="editFormButtons">
             <button type="button" id="editCancelButton">キャンセル</button>
@@ -420,18 +376,13 @@
         </div>
     </div>
 
-    <!-- Leaflet -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-    <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-
         // =========================================
-        // Supabaseの設定
+        // Supabase
         // =========================================
-
         const SUPABASE_URL =
             "https://cskyusrujmxhczcgkdke.supabase.co";
 
@@ -444,72 +395,54 @@
                 SUPABASE_PUBLISHABLE_KEY
             );
 
-
         // =========================================
-        // Leafletの地図を作成
+        // Leaflet地図
         // =========================================
+        const map = L.map("map").setView([38.0, 138.4], 10);
 
-        const map =
-            L.map('map').setView([38.0, 138.4], 10);
-
-
-        // OpenStreetMap
         L.tileLayer(
-            'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
             {
-                attribution:
-                    '&copy; OpenStreetMap contributors'
+                attribution: "&copy; OpenStreetMap contributors"
             }
         ).addTo(map);
 
-
         // =========================================
-        // カテゴリーごとのレイヤー
+        // カテゴリー
         // =========================================
-
         const layers = {
-            "活動場所": L.layerGroup(),
-            "宿泊地": L.layerGroup(),
-            "観光地": L.layerGroup(),
-            "飲食店": L.layerGroup(),
-            "生活用品店": L.layerGroup()
+            "活動場所": L.layerGroup().addTo(map),
+            "宿泊地": L.layerGroup().addTo(map),
+            "観光地": L.layerGroup().addTo(map),
+            "飲食店": L.layerGroup().addTo(map),
+            "生活用品店": L.layerGroup().addTo(map)
         };
 
-
-        // =========================================
-        // マーカーのアイコン
-        // =========================================
-
         const icons = {
-
             "活動場所": L.divIcon({
                 html: "🌾",
                 className: "emoji-marker",
                 iconSize: [40, 40],
                 iconAnchor: [20, 20]
             }),
-
             "宿泊地": L.divIcon({
                 html: "🏠",
                 className: "emoji-marker",
                 iconSize: [40, 40],
                 iconAnchor: [20, 20]
             }),
-
             "観光地": L.divIcon({
                 html: "📍",
                 className: "emoji-marker",
                 iconSize: [40, 40],
                 iconAnchor: [20, 20]
             }),
-
             "飲食店": L.divIcon({
                 html: "🍴",
                 className: "emoji-marker",
                 iconSize: [40, 40],
                 iconAnchor: [20, 20]
             }),
-
             "生活用品店": L.divIcon({
                 html: "🛒",
                 className: "emoji-marker",
@@ -518,8 +451,6 @@
             })
         };
 
-
-        // カテゴリーが見つからない場合
         const defaultIcon = L.divIcon({
             html: "📍",
             className: "emoji-marker",
@@ -527,337 +458,92 @@
             iconAnchor: [20, 20]
         });
 
-
         // =========================================
-        // 編集関連の変数
+        // 状態
         // =========================================
-
         let editMode = false;
         let editingSpotId = null;
-
-        // RECメンバーかどうか
         let currentUserIsMember = false;
         let currentUserIsAdmin = false;
+        let newSpotLat = null;
+        let newSpotLng = null;
+        let temporaryMarker = null;
 
+        let selectedSpotImages = [];
+        let selectedEditImages = [];
+        let existingEditImages = [];
+        let imagesToDelete = [];
 
         // =========================================
-        // Supabaseからスポットを取得
+        // HTML要素
         // =========================================
+        const loginButton = document.getElementById("loginButton");
+        const logoutButton = document.getElementById("logoutButton");
+        const userInfo = document.getElementById("userInfo");
+        const roleInfo = document.getElementById("roleInfo");
+        const controls = document.getElementById("controls");
+        const editModeButton = document.getElementById("editModeButton");
+        const modeText = document.getElementById("modeText");
+        const adminPanel = document.getElementById("adminPanel");
+        const newMemberEmail = document.getElementById("newMemberEmail");
+        const memberList = document.getElementById("memberList");
 
-        async function loadPlaces() {
+        // =========================================
+        // 画面上のHTMLに安全に文字を入れるための関数
+        // =========================================
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
 
-            const { data, error } =
-                await supabaseClient
-                    .from('spots')
-                    .select('*');
+        function escapeAttribute(value) {
+            return escapeHtml(value).replace(/`/g, "&#096;");
+        }
 
-            if (error) {
+        // =========================================
+        // 写真プレビュー
+        // =========================================
+        function renderPhotoPreview(files, previewId, selectedArray) {
+            const preview = document.getElementById(previewId);
 
-                console.error(
-                    "Supabaseエラー:",
-                    error
-                );
-
-                alert(
-                    "スポット情報を取得できませんでした。\n" +
-                    error.message
-                );
-
+            if (!preview) {
+                console.error("写真プレビュー欄が見つかりません:", previewId);
                 return;
             }
 
-            console.log(
-                "Supabaseから取得したデータ:",
-                data
-            );
-
-
-            // 既存のマーカーを消す
-            Object.values(layers).forEach(
-                function(layer) {
-                    layer.clearLayers();
-                }
-            );
-
-
-            data.forEach(function(place) {
-
-                // マーカーを作成
-                const marker = L.marker(
-                    [place.lat, place.lng],
-                    {
-                        icon:
-                            icons[place.category] ||
-                            defaultIcon
-                    }
-                );
-
-
-                // =====================================
-                // ポップアップ
-                // =====================================
-
-                let popupHtml = `
-                    <div style="width:260px;">
-
-                        <h2>${place.name || ""}</h2>
-
-                        ${
-                            place.image_url
-                            ?
-                            `<img
-                                src="${place.image_url}"
-                                alt="${place.name || "スポット写真"}"
-                                class="photo-preview"
-                            >`
-                            :
-                            ""
-                        }
-
-                        <p>
-                            <strong>カテゴリー：</strong>
-                            ${place.category || ""}
-                        </p>
-
-                        ${
-                            place.subcategory
-                            ?
-                            `<p>
-                                <strong>分類：</strong>
-                                ${place.subcategory}
-                            </p>`
-                            :
-                            ""
-                        }
-
-                        <hr>
-
-                        <p>
-                            <strong>📍 所在地</strong><br>
-                            ${place.address || ""}
-                        </p>
-
-                        <p>
-                            <strong>🌾 活動内容</strong><br>
-                            ${place.activity_history || ""}
-                        </p>
-
-                        <p>
-                            <strong>📝 メモ</strong><br>
-                            ${place.note || ""}
-                        </p>
-
-                        <hr>
-
-                        <p>
-                            ${place.description || ""}
-                        </p>
-                `;
-
-
-                // 編集モード中のRECメンバーだけ編集ボタンを表示
-                if (currentUserIsMember && editMode) {
-
-                    popupHtml += `
-                        <div style="margin-top:10px;">
-                            <button
-                                onclick="openEditForm(${place.id})"
-                                style="
-                                    padding:6px 10px;
-                                    cursor:pointer;
-                                    margin-right:5px;
-                                "
-                            >
-                                ✏️ 編集
-                            </button>
-                    `;
-
-                    // 管理者だけ削除ボタンを表示
-                    if (currentUserIsAdmin) {
-                        popupHtml += `
-                            <button
-                                onclick="deleteSpot(${place.id}, '${String(place.name || "").replace(/'/g, "\\'")}')"
-                                style="
-                                    padding:6px 10px;
-                                    cursor:pointer;
-                                "
-                            >
-                                🗑️ 削除
-                            </button>
-                        `;
-                    }
-
-                    popupHtml += `
-                        </div>
-                    `;
-                }
-
-
-                popupHtml += `
-                    </div>
-                `;
-
-
-                marker.bindPopup(popupHtml);
-
-
-                // =====================================
-                // カテゴリーに対応するレイヤーへ追加
-                // =====================================
-
-                if (layers[place.category]) {
-
-                    marker.addTo(
-                        layers[place.category]
-                    );
-
-                } else {
-
-                    marker.addTo(map);
-                }
-
-            });
-
-
-            // =====================================
-            // レイヤーを地図に追加
-            // =====================================
-
-            Object.values(layers).forEach(
-                function(layer) {
-                    layer.addTo(map);
-                }
-            );
-        }
-
-
-        // =========================================
-        // カテゴリー表示切り替え
-        // =========================================
-
-        function showAllLayers() {
-
-            Object.values(layers).forEach(
-                function(layer) {
-                    if (!map.hasLayer(layer)) {
-                        layer.addTo(map);
-                    }
-                }
-            );
-        }
-
-        function showCategory(category) {
-
-            Object.values(layers).forEach(
-                function(layer) {
-                    if (map.hasLayer(layer)) {
-                        map.removeLayer(layer);
-                    }
-                }
-            );
-
-            if (layers[category]) {
-                layers[category].addTo(map);
-            }
-        }
-
-        window.showAllLayers = showAllLayers;
-        window.showCategory = showCategory;
-
-
-        // =========================================
-        // 編集モード
-        // =========================================
-
-        const editModeButton =
-            document.getElementById(
-                "editModeButton"
-            );
-
-        const modeText =
-            document.getElementById(
-                "modeText"
-            );
-
-
-        editModeButton.addEventListener(
-            "click",
-            function() {
-
-                editMode = !editMode;
-
-                if (editMode) {
-
-                    editModeButton.textContent =
-                        "👀 閲覧モードに戻す";
-
-                    modeText.textContent =
-                        "現在：編集モード";
-
-                } else {
-
-                    editModeButton.textContent =
-                        "✏️ 編集モード";
-
-                    modeText.textContent =
-                        "現在：閲覧モード";
-                }
-
-                // ポップアップ内の編集・削除ボタン表示を更新
-                loadPlaces();
-            }
-        );
-
-
-        // =========================================
-        // スポット追加用の変数
-        // =========================================
-
-        let newSpotLat = null;
-        let newSpotLng = null;
-
-        let temporaryMarker = null;
-
-        // 選択中の写真
-        let selectedSpotImages = [];
-        let selectedEditImages = [];
-
-
-        // =========================================
-        // 写真選択・プレビュー
-        // =========================================
-
-        function renderPhotoPreview(files, previewId, selectedArray) {
-
-            const preview = document.getElementById(previewId);
             preview.innerHTML = "";
 
             files.forEach(function(file, index) {
-
                 const reader = new FileReader();
 
-                reader.onload = function(e) {
-
+                reader.onload = function(event) {
                     const item = document.createElement("div");
                     item.className = "photo-preview-item";
 
-                    item.innerHTML = `
-                        <img src="${e.target.result}" alt="選択した写真">
-                        <button type="button" title="この写真を外す">×</button>
-                    `;
+                    const image = document.createElement("img");
+                    image.src = event.target.result;
+                    image.alt = "選択した写真";
 
-                    item.querySelector("button").addEventListener(
-                        "click",
-                        function() {
-                            selectedArray.splice(index, 1);
-                            renderPhotoPreview(
-                                selectedArray,
-                                previewId,
-                                selectedArray
-                            );
-                        }
-                    );
+                    const removeButton = document.createElement("button");
+                    removeButton.type = "button";
+                    removeButton.textContent = "×";
+                    removeButton.title = "この写真を外す";
 
+                    removeButton.addEventListener("click", function() {
+                        selectedArray.splice(index, 1);
+                        renderPhotoPreview(
+                            selectedArray,
+                            previewId,
+                            selectedArray
+                        );
+                    });
+
+                    item.appendChild(image);
+                    item.appendChild(removeButton);
                     preview.appendChild(item);
                 };
 
@@ -865,22 +551,24 @@
             });
         }
 
-
         function handlePhotoSelection(inputId, previewId, selectedArray) {
-
             const input = document.getElementById(inputId);
 
+            // 今回のエラー対策：HTML要素がない場合は処理を止める
+            if (!input) {
+                console.error("写真入力欄が見つかりません:", inputId);
+                return;
+            }
+
             input.addEventListener("change", function() {
-
-                Array.from(input.files).forEach(function(file) {
-
+                Array.from(input.files || []).forEach(function(file) {
                     if (!file.type.startsWith("image/")) {
-                        alert("画像ファイルだけ選択してください");
+                        alert(file.name + " は画像ファイルではありません。");
                         return;
                     }
 
                     if (file.size > 5 * 1024 * 1024) {
-                        alert(file.name + " は5MBを超えています");
+                        alert(file.name + " は5MBを超えています。");
                         return;
                     }
 
@@ -897,7 +585,7 @@
             });
         }
 
-
+        // 必ずHTML側に存在するIDを使用
         handlePhotoSelection(
             "spotImages",
             "spotPhotoPreview",
@@ -910,38 +598,28 @@
             selectedEditImages
         );
 
-
         // =========================================
-        // Supabase Storageへ写真をアップロード
+        // Storageへ複数写真をアップロード
         // =========================================
-
         async function uploadSpotImages(spotId, files) {
-
             const uploadedImages = [];
 
             for (const file of files) {
-
                 const extension =
-                    file.name.split(".").pop();
+                    file.name.includes(".")
+                        ? file.name.split(".").pop().toLowerCase()
+                        : "jpg";
 
-                const fileName =
-                    spotId +
-                    "/" +
-                    crypto.randomUUID() +
-                    "." +
-                    extension;
+                const filePath =
+                    spotId + "/" + crypto.randomUUID() + "." + extension;
 
                 const { error: uploadError } =
                     await supabaseClient.storage
                         .from("spot-images")
-                        .upload(
-                            fileName,
-                            file,
-                            {
-                                cacheControl: "3600",
-                                upsert: false
-                            }
-                        );
+                        .upload(filePath, file, {
+                            cacheControl: "3600",
+                            upsert: false
+                        });
 
                 if (uploadError) {
                     throw uploadError;
@@ -950,383 +628,385 @@
                 const { data: publicUrlData } =
                     supabaseClient.storage
                         .from("spot-images")
-                        .getPublicUrl(fileName);
+                        .getPublicUrl(filePath);
 
-                const imageUrl =
-                    publicUrlData.publicUrl;
+                const imageUrl = publicUrlData.publicUrl;
 
-                const { error: dbError } =
+                const { data: imageRow, error: dbError } =
                     await supabaseClient
                         .from("spot_images")
                         .insert({
                             spot_id: spotId,
                             image_url: imageUrl,
-                            file_path: fileName
-                        });
+                            file_path: filePath
+                        })
+                        .select()
+                        .single();
 
                 if (dbError) {
+                    // DB登録に失敗した場合は、今アップロードしたファイルを削除する
+                    await supabaseClient.storage
+                        .from("spot-images")
+                        .remove([filePath]);
+
                     throw dbError;
                 }
 
-                uploadedImages.push({
-                    image_url: imageUrl,
-                    file_path: fileName
-                });
+                uploadedImages.push(imageRow);
             }
 
             return uploadedImages;
         }
 
-
         // =========================================
-        // 地図をクリック
+        // 写真一覧を取得
         // =========================================
+        async function getSpotImages(spotId) {
+            const { data, error } =
+                await supabaseClient
+                    .from("spot_images")
+                    .select("id, spot_id, image_url, file_path, created_at")
+                    .eq("spot_id", spotId)
+                    .order("created_at", { ascending: true });
 
-        map.on(
-            "click",
-            function(e) {
-
-                // 閲覧モードなら何もしない
-                if (!editMode) {
-                    return;
-                }
-
-                // クリックした場所の座標
-                newSpotLat = e.latlng.lat;
-                newSpotLng = e.latlng.lng;
-
-
-                console.log(
-                    "新しいスポットの場所:",
-                    newSpotLat,
-                    newSpotLng
-                );
-
-
-                // すでに仮マーカーがあれば削除
-                if (temporaryMarker) {
-
-                    map.removeLayer(
-                        temporaryMarker
-                    );
-                }
-
-
-                // 新しい仮マーカー
-                temporaryMarker =
-                    L.marker(
-                        [newSpotLat, newSpotLng]
-                    ).addTo(map);
-
-
-                temporaryMarker
-                    .bindPopup(
-                        "ここにスポットを追加します"
-                    )
-                    .openPopup();
-
-
-                // 入力フォームを表示
-                document.getElementById(
-                    "spotForm"
-                ).style.display = "block";
+            if (error) {
+                console.error("写真取得エラー:", error);
+                return [];
             }
-        );
 
+            return data || [];
+        }
 
         // =========================================
-        // スポット追加：キャンセル
+        // ポップアップ写真を作る
         // =========================================
-
-        document.getElementById(
-            "cancelButton"
-        ).addEventListener(
-            "click",
-            function() {
-
-                document.getElementById(
-                    "spotForm"
-                ).style.display = "none";
-
-
-                if (temporaryMarker) {
-
-                    map.removeLayer(
-                        temporaryMarker
-                    );
-
-                    temporaryMarker = null;
-                }
-
-
-                newSpotLat = null;
-                newSpotLng = null;
+        function buildGalleryHtml(images, spotName) {
+            if (!images || images.length === 0) {
+                return "";
             }
-        );
 
+            const galleryItems = images.map(function(image) {
+                const safeUrl = escapeAttribute(image.image_url);
+                const safeName = escapeAttribute(spotName || "スポット写真");
+
+                return `
+                    <img
+                        src="${safeUrl}"
+                        alt="${safeName}"
+                        onclick="window.open(${JSON.stringify(image.image_url)}, '_blank')"
+                        title="クリックで写真を拡大"
+                    >
+                `;
+            }).join("");
+
+            return `
+                <div>
+                    <strong>📷 写真</strong>
+                    <div class="spot-gallery">${galleryItems}</div>
+                </div>
+            `;
+        }
 
         // =========================================
-        // スポット追加：保存
+        // スポット読み込み
         // =========================================
+        async function loadPlaces() {
+            const { data, error } =
+                await supabaseClient
+                    .from("spots")
+                    .select("*")
+                    .order("id", { ascending: true });
 
-        document.getElementById(
-            "saveButton"
-        ).addEventListener(
-            "click",
-            async function() {
-
-                const name =
-                    document.getElementById(
-                        "spotName"
-                    ).value;
-
-                const category =
-                    document.getElementById(
-                        "spotCategory"
-                    ).value;
-
-                const subcategory =
-                    document.getElementById(
-                        "spotSubcategory"
-                    ).value;
-
-                const address =
-                    document.getElementById(
-                        "spotAddress"
-                    ).value;
-
-                const activity =
-                    document.getElementById(
-                        "spotActivity"
-                    ).value;
-
-                const note =
-                    document.getElementById(
-                        "spotNote"
-                    ).value;
-
-
-                if (!name) {
-
-                    alert(
-                        "スポット名を入力してください"
-                    );
-
-                    return;
-                }
-
-
-                if (
-                    newSpotLat === null ||
-                    newSpotLng === null
-                ) {
-
-                    alert(
-                        "地図上の場所を選択してください"
-                    );
-
-                    return;
-                }
-
-
-                const imageFile =
-                    document.getElementById(
-                        "spotImage"
-                    ).files[0];
-
-                // Supabaseに登録
-                const { data, error } =
-                    await supabaseClient
-                        .from("spots")
-                        .insert([
-                            {
-                                name: name,
-                                lat: newSpotLat,
-                                lng: newSpotLng,
-                                category: category,
-                                subcategory: subcategory,
-                                address: address,
-                                activity_history: activity,
-                                note: note
-                            }
-                        ])
-                        .select();
-
-
-                if (error) {
-
-                    console.error(
-                        "保存エラー:",
-                        error
-                    );
-
-                    alert(
-                        "保存に失敗しました。\n" +
-                        error.message
-                    );
-
-                    return;
-                }
-
-
-                console.log(
-                    "保存されたデータ:",
-                    data
-                );
-
-                const newSpot = data && data[0];
-
-                // 写真が選択されている場合はStorageへアップロード
-                if (imageFile && newSpot) {
-
-                    if (!imageFile.type.startsWith("image/")) {
-                        alert("写真ファイルを選択してください");
-                        return;
-                    }
-
-                    if (imageFile.size > 5 * 1024 * 1024) {
-                        alert("写真は5MB以下にしてください");
-                        return;
-                    }
-
-                    const extension =
-                        imageFile.name
-                            .split(".")
-                            .pop()
-                            .toLowerCase();
-
-                    const filePath =
-                        "spot-" +
-                        newSpot.id +
-                        "-" +
-                        Date.now() +
-                        "." +
-                        extension;
-
-                    const {
-                        error: uploadError
-                    } =
-                        await supabaseClient.storage
-                            .from("spot-images")
-                            .upload(
-                                filePath,
-                                imageFile,
-                                {
-                                    cacheControl: "3600",
-                                    upsert: false
-                                }
-                            );
-
-                    if (uploadError) {
-
-                        console.error(
-                            "写真アップロードエラー:",
-                            uploadError
-                        );
-
-                        alert(
-                            "スポットは登録されましたが、写真の保存に失敗しました。\n" +
-                            uploadError.message
-                        );
-
-                    } else {
-
-                        const {
-                            data: publicUrlData
-                        } =
-                            supabaseClient.storage
-                                .from("spot-images")
-                                .getPublicUrl(
-                                    filePath
-                                );
-
-                        const imageUrl =
-                            publicUrlData.publicUrl;
-
-                        const {
-                            error: imageUrlError
-                        } =
-                            await supabaseClient
-                                .from("spots")
-                                .update({
-                                    image_url: imageUrl
-                                })
-                                .eq(
-                                    "id",
-                                    newSpot.id
-                                );
-
-                        if (imageUrlError) {
-
-                            console.error(
-                                "写真URL保存エラー:",
-                                imageUrlError
-                            );
-
-                            alert(
-                                "スポットは登録されましたが、写真URLの保存に失敗しました。"
-                            );
-                        }
-                    }
-                }
-
+            if (error) {
+                console.error("Supabaseエラー:", error);
                 alert(
-                    "スポットを保存しました！"
+                    "スポット情報を取得できませんでした。\n" +
+                    error.message
+                );
+                return;
+            }
+
+            Object.values(layers).forEach(function(layer) {
+                layer.clearLayers();
+            });
+
+            for (const place of data || []) {
+                const marker = L.marker(
+                    [place.lat, place.lng],
+                    {
+                        icon: icons[place.category] || defaultIcon
+                    }
                 );
 
+                // 新しい複数写真テーブル
+                const images = await getSpotImages(place.id);
 
-                document.getElementById(
-                    "spotForm"
-                ).style.display = "none";
-
-
-                if (temporaryMarker) {
-
-                    map.removeLayer(
-                        temporaryMarker
-                    );
-
-                    temporaryMarker = null;
+                // 以前のimage_urlが残っている場合も表示できるようにする
+                if (place.image_url && images.length === 0) {
+                    images.push({
+                        image_url: place.image_url,
+                        file_path: null
+                    });
                 }
 
+                let popupHtml = `
+                    <div style="width:280px;">
+                        <h2 style="margin:0 0 8px;">${escapeHtml(place.name || "")}</h2>
 
-                newSpotLat = null;
-                newSpotLng = null;
+                        ${buildGalleryHtml(images, place.name)}
 
+                        <p>
+                            <strong>カテゴリー：</strong>
+                            ${escapeHtml(place.category || "")}
+                        </p>
 
-                // 入力フォームを空にする
-                document.getElementById(
-                    "spotName"
-                ).value = "";
+                        ${
+                            place.subcategory
+                                ? `<p><strong>分類：</strong>${escapeHtml(place.subcategory)}</p>`
+                                : ""
+                        }
 
-                document.getElementById(
-                    "spotSubcategory"
-                ).value = "";
+                        <hr>
 
-                document.getElementById(
-                    "spotAddress"
-                ).value = "";
+                        <p>
+                            <strong>📍 所在地</strong><br>
+                            ${escapeHtml(place.address || "")}
+                        </p>
 
-                document.getElementById(
-                    "spotActivity"
-                ).value = "";
+                        <p>
+                            <strong>🌾 活動内容・利用内容</strong><br>
+                            ${escapeHtml(place.activity_history || "")}
+                        </p>
 
-                document.getElementById(
-                    "spotNote"
-                ).value = "";
+                        <p>
+                            <strong>📝 メモ</strong><br>
+                            ${escapeHtml(place.note || "")}
+                        </p>
 
+                        ${
+                            place.description
+                                ? `<hr><p>${escapeHtml(place.description)}</p>`
+                                : ""
+                        }
+                `;
 
-                // 最新のデータを読み込む
-                await loadPlaces();
+                if (currentUserIsMember && editMode) {
+                    popupHtml += `
+                        <div style="margin-top:12px;">
+                            <button
+                                type="button"
+                                onclick="openEditForm(${Number(place.id)})"
+                                style="padding:6px 10px;cursor:pointer;margin-right:5px;"
+                            >
+                                ✏️ 編集
+                            </button>
+                    `;
+
+                    if (currentUserIsAdmin) {
+                        popupHtml += `
+                            <button
+                                type="button"
+                                onclick="deleteSpot(${Number(place.id)})"
+                                style="padding:6px 10px;cursor:pointer;"
+                            >
+                                🗑️ 削除
+                            </button>
+                        `;
+                    }
+
+                    popupHtml += "</div>";
+                }
+
+                popupHtml += "</div>";
+
+                marker.bindPopup(popupHtml);
+
+                if (layers[place.category]) {
+                    marker.addTo(layers[place.category]);
+                } else {
+                    marker.addTo(map);
+                }
             }
-        );
+        }
 
+        // =========================================
+        // カテゴリー表示
+        // =========================================
+        function showAllLayers() {
+            Object.values(layers).forEach(function(layer) {
+                if (!map.hasLayer(layer)) {
+                    layer.addTo(map);
+                }
+            });
+        }
+
+        function showCategory(category) {
+            Object.values(layers).forEach(function(layer) {
+                if (map.hasLayer(layer)) {
+                    map.removeLayer(layer);
+                }
+            });
+
+            if (layers[category]) {
+                layers[category].addTo(map);
+            }
+        }
+
+        window.showAllLayers = showAllLayers;
+        window.showCategory = showCategory;
+
+        // =========================================
+        // 編集モード
+        // =========================================
+        editModeButton.addEventListener("click", async function() {
+            if (!currentUserIsMember) {
+                alert("RECメンバーだけが編集できます。");
+                return;
+            }
+
+            editMode = !editMode;
+
+            if (editMode) {
+                editModeButton.textContent = "👀 閲覧モードに戻す";
+                modeText.textContent = "現在：編集モード";
+            } else {
+                editModeButton.textContent = "✏️ 編集モード";
+                modeText.textContent = "現在：閲覧モード";
+            }
+
+            await loadPlaces();
+        });
+
+        // =========================================
+        // 地図をクリックして新規スポット
+        // =========================================
+        map.on("click", function(e) {
+            if (!currentUserIsMember || !editMode) {
+                return;
+            }
+
+            newSpotLat = e.latlng.lat;
+            newSpotLng = e.latlng.lng;
+
+            if (temporaryMarker) {
+                map.removeLayer(temporaryMarker);
+            }
+
+            temporaryMarker = L.marker(
+                [newSpotLat, newSpotLng],
+                { icon: defaultIcon }
+            ).addTo(map);
+
+            temporaryMarker
+                .bindPopup("ここにスポットを追加します")
+                .openPopup();
+
+            selectedSpotImages = [];
+            document.getElementById("spotPhotoPreview").innerHTML = "";
+
+            document.getElementById("spotForm").style.display = "block";
+        });
+
+        // =========================================
+        // 新規追加キャンセル
+        // =========================================
+        document.getElementById("cancelButton").addEventListener("click", function() {
+            closeSpotForm();
+        });
+
+        function closeSpotForm() {
+            document.getElementById("spotForm").style.display = "none";
+
+            if (temporaryMarker) {
+                map.removeLayer(temporaryMarker);
+                temporaryMarker = null;
+            }
+
+            newSpotLat = null;
+            newSpotLng = null;
+            selectedSpotImages = [];
+            document.getElementById("spotPhotoPreview").innerHTML = "";
+            document.getElementById("spotImages").value = "";
+            document.getElementById("spotName").value = "";
+            document.getElementById("spotSubcategory").value = "";
+            document.getElementById("spotAddress").value = "";
+            document.getElementById("spotActivity").value = "";
+            document.getElementById("spotNote").value = "";
+        }
+
+        // =========================================
+        // 新規スポット保存
+        // =========================================
+        document.getElementById("saveButton").addEventListener("click", async function() {
+            if (!currentUserIsMember) {
+                alert("RECメンバーだけがスポットを追加できます。");
+                return;
+            }
+
+            if (newSpotLat === null || newSpotLng === null) {
+                alert("地図上の場所を選択してください。");
+                return;
+            }
+
+            const name = document.getElementById("spotName").value.trim();
+            const category = document.getElementById("spotCategory").value;
+            const subcategory = document.getElementById("spotSubcategory").value.trim();
+            const address = document.getElementById("spotAddress").value.trim();
+            const activity = document.getElementById("spotActivity").value.trim();
+            const note = document.getElementById("spotNote").value.trim();
+
+            if (!name) {
+                alert("スポット名を入力してください。");
+                return;
+            }
+
+            const { data, error } =
+                await supabaseClient
+                    .from("spots")
+                    .insert({
+                        name: name,
+                        lat: newSpotLat,
+                        lng: newSpotLng,
+                        category: category,
+                        subcategory: subcategory,
+                        address: address,
+                        activity_history: activity,
+                        note: note
+                    })
+                    .select()
+                    .single();
+
+            if (error) {
+                console.error("スポット保存エラー:", error);
+                alert("スポットの保存に失敗しました。\n" + error.message);
+                return;
+            }
+
+            try {
+                if (selectedSpotImages.length > 0) {
+                    await uploadSpotImages(data.id, selectedSpotImages);
+                }
+            } catch (imageError) {
+                console.error("写真保存エラー:", imageError);
+                alert(
+                    "スポット本体は保存されましたが、写真の保存に失敗しました。\n" +
+                    imageError.message
+                );
+            }
+
+            alert("スポットを保存しました！");
+            closeSpotForm();
+            await loadPlaces();
+        });
 
         // =========================================
         // 編集フォームを開く
         // =========================================
-
         async function openEditForm(id) {
+            if (!currentUserIsMember) {
+                alert("RECメンバーだけが編集できます。");
+                return;
+            }
 
             const { data, error } =
                 await supabaseClient
@@ -1335,355 +1015,256 @@
                     .eq("id", id)
                     .single();
 
-
             if (error) {
-
-                console.error(
-                    "スポット取得エラー:",
-                    error
-                );
-
-                alert(
-                    "スポット情報を取得できませんでした"
-                );
-
+                console.error("スポット取得エラー:", error);
+                alert("スポット情報を取得できませんでした。\n" + error.message);
                 return;
             }
 
-
             editingSpotId = id;
+            selectedEditImages = [];
+            imagesToDelete = [];
 
+            document.getElementById("editSpotName").value = data.name || "";
+            document.getElementById("editSpotCategory").value = data.category || "活動場所";
+            document.getElementById("editSpotSubcategory").value = data.subcategory || "";
+            document.getElementById("editSpotAddress").value = data.address || "";
+            document.getElementById("editSpotActivity").value = data.activity_history || "";
+            document.getElementById("editSpotNote").value = data.note || "";
+            document.getElementById("editSpotImages").value = "";
+            document.getElementById("editPhotoPreview").innerHTML = "";
+            document.getElementById("legacyEditPhotoPreview").innerHTML = "";
 
-            // 現在の情報をフォームに入れる
-            document.getElementById(
-                "editSpotName"
-            ).value = data.name || "";
+            existingEditImages = await getSpotImages(id);
+            renderExistingEditImages();
 
-            document.getElementById(
-                "editSpotCategory"
-            ).value =
-                data.category || "活動場所";
-
-            document.getElementById(
-                "editSpotSubcategory"
-            ).value =
-                data.subcategory || "";
-
-            document.getElementById(
-                "editSpotAddress"
-            ).value =
-                data.address || "";
-
-            document.getElementById(
-                "editSpotActivity"
-            ).value =
-                data.activity_history || "";
-
-            document.getElementById(
-                "editSpotNote"
-            ).value =
-                data.note || "";
-
-            document.getElementById(
-                "editSpotImage"
-            ).value = "";
-
-            const editPhotoPreview =
-                document.getElementById(
-                    "editPhotoPreview"
-                );
-
-            if (data.image_url) {
-                editPhotoPreview.innerHTML =
-                    `<img
-                        src="${data.image_url}"
-                        alt="現在のスポット写真"
-                        class="photo-preview"
-                    >`;
-            } else {
-                editPhotoPreview.innerHTML =
-                    "<p>現在、写真は登録されていません。</p>";
+            // 旧image_urlが存在し、spot_imagesにない場合は「旧写真」として表示
+            if (data.image_url && existingEditImages.length === 0) {
+                const legacy = document.createElement("div");
+                legacy.innerHTML =
+                    "<div class='small-note'>以前の形式で保存された写真</div>" +
+                    `<img src="${escapeAttribute(data.image_url)}" alt="現在のスポット写真" style="width:100%;max-height:200px;object-fit:cover;border-radius:8px;margin-top:6px;">`;
+                document.getElementById("legacyEditPhotoPreview").appendChild(legacy);
             }
 
-
-            // 編集フォームを表示
-            document.getElementById(
-                "editSpotForm"
-            ).style.display = "block";
+            document.getElementById("editSpotForm").style.display = "block";
         }
 
-
-        // inline onclickから呼び出せるようにする
         window.openEditForm = openEditForm;
 
+        // =========================================
+        // 既存写真の表示
+        // =========================================
+        function renderExistingEditImages() {
+            const container = document.getElementById("existingEditPhotoPreview");
+            container.innerHTML = "";
+
+            existingEditImages.forEach(function(image) {
+                const item = document.createElement("div");
+                item.className = "existing-photo-item";
+
+                const img = document.createElement("img");
+                img.src = image.image_url;
+                img.alt = "登録済み写真";
+
+                const deleteButton = document.createElement("button");
+                deleteButton.type = "button";
+                deleteButton.textContent = "削除";
+                deleteButton.title = "保存時にこの写真を削除します";
+
+                deleteButton.addEventListener("click", function() {
+                    const alreadyMarked = imagesToDelete.some(function(item) {
+                        return item.id === image.id;
+                    });
+
+                    if (alreadyMarked) {
+                        return;
+                    }
+
+                    imagesToDelete.push(image);
+                    item.style.opacity = "0.35";
+                    deleteButton.textContent = "削除予定";
+                    deleteButton.disabled = true;
+                });
+
+                item.appendChild(img);
+                item.appendChild(deleteButton);
+                container.appendChild(item);
+            });
+        }
 
         // =========================================
-        // 編集：キャンセル
+        // 編集キャンセル
         // =========================================
+        document.getElementById("editCancelButton").addEventListener("click", function() {
+            closeEditForm();
+        });
 
-        document.getElementById(
-            "editCancelButton"
-        ).addEventListener(
-            "click",
-            function() {
+        function closeEditForm() {
+            document.getElementById("editSpotForm").style.display = "none";
+            document.getElementById("editSpotImages").value = "";
+            document.getElementById("editPhotoPreview").innerHTML = "";
+            document.getElementById("existingEditPhotoPreview").innerHTML = "";
+            document.getElementById("legacyEditPhotoPreview").innerHTML = "";
 
-                document.getElementById(
-                    "editSpotForm"
-                ).style.display = "none";
-
-                selectedEditImages = [];
-
-                document.getElementById(
-                    "editPhotoPreview"
-                ).innerHTML = "";
-
-                editingSpotId = null;
-            }
-        );
-
+            selectedEditImages = [];
+            existingEditImages = [];
+            imagesToDelete = [];
+            editingSpotId = null;
+        }
 
         // =========================================
-        // 編集：保存
+        // 既存写真削除を実行
         // =========================================
-
-        document.getElementById(
-            "editSaveButton"
-        ).addEventListener(
-            "click",
-            async function() {
-
-                if (editingSpotId === null) {
-
-                    alert(
-                        "編集するスポットが選択されていません"
-                    );
-
-                    return;
-                }
-
-
-                const name =
-                    document.getElementById(
-                        "editSpotName"
-                    ).value;
-
-                const category =
-                    document.getElementById(
-                        "editSpotCategory"
-                    ).value;
-
-                const subcategory =
-                    document.getElementById(
-                        "editSpotSubcategory"
-                    ).value;
-
-                const address =
-                    document.getElementById(
-                        "editSpotAddress"
-                    ).value;
-
-                const activity =
-                    document.getElementById(
-                        "editSpotActivity"
-                    ).value;
-
-                const note =
-                    document.getElementById(
-                        "editSpotNote"
-                    ).value;
-
-                const imageFile =
-                    document.getElementById(
-                        "editSpotImage"
-                    ).files[0];
-
-
-                if (!name) {
-
-                    alert(
-                        "スポット名を入力してください"
-                    );
-
-                    return;
-                }
-
-
-                // Supabaseのデータを更新
-                const { data, error } =
+        async function deleteMarkedImages() {
+            for (const image of imagesToDelete) {
+                const { error: dbError } =
                     await supabaseClient
-                        .from("spots")
-                        .update({
-                            name: name,
-                            category: category,
-                            subcategory: subcategory,
-                            address: address,
-                            activity_history: activity,
-                            note: note
-                        })
-                        .eq(
-                            "id",
-                            editingSpotId
-                        )
-                        .select();
+                        .from("spot_images")
+                        .delete()
+                        .eq("id", image.id);
 
-
-                if (error) {
-
-                    console.error(
-                        "更新エラー:",
-                        error
-                    );
-
-                    alert(
-                        "保存に失敗しました。\n" +
-                        error.message
-                    );
-
-                    return;
+                if (dbError) {
+                    throw dbError;
                 }
 
-
-                console.log(
-                    "更新されたデータ:",
-                    data
-                );
-
-                // 新しい写真が選択されていればアップロード
-                if (imageFile) {
-
-                    if (!imageFile.type.startsWith("image/")) {
-                        alert("写真ファイルを選択してください");
-                        return;
-                    }
-
-                    if (imageFile.size > 5 * 1024 * 1024) {
-                        alert("写真は5MB以下にしてください");
-                        return;
-                    }
-
-                    const extension =
-                        imageFile.name
-                            .split(".")
-                            .pop()
-                            .toLowerCase();
-
-                    const filePath =
-                        "spot-" +
-                        editingSpotId +
-                        "-" +
-                        Date.now() +
-                        "." +
-                        extension;
-
-                    const {
-                        error: uploadError
-                    } =
+                if (image.file_path) {
+                    const { error: storageError } =
                         await supabaseClient.storage
                             .from("spot-images")
-                            .upload(
-                                filePath,
-                                imageFile,
-                                {
-                                    cacheControl: "3600",
-                                    upsert: false
-                                }
-                            );
+                            .remove([image.file_path]);
 
-                    if (uploadError) {
-
-                        console.error(
-                            "写真アップロードエラー:",
-                            uploadError
-                        );
-
-                        alert(
-                            "文章は更新されましたが、写真の保存に失敗しました。\n" +
-                            uploadError.message
-                        );
-
-                    } else {
-
-                        const {
-                            data: publicUrlData
-                        } =
-                            supabaseClient.storage
-                                .from("spot-images")
-                                .getPublicUrl(
-                                    filePath
-                                );
-
-                        const imageUrl =
-                            publicUrlData.publicUrl;
-
-                        const {
-                            error: imageUrlError
-                        } =
-                            await supabaseClient
-                                .from("spots")
-                                .update({
-                                    image_url: imageUrl
-                                })
-                                .eq(
-                                    "id",
-                                    editingSpotId
-                                );
-
-                        if (imageUrlError) {
-
-                            console.error(
-                                "写真URL更新エラー:",
-                                imageUrlError
-                            );
-
-                            alert(
-                                "文章は更新されましたが、写真URLの更新に失敗しました。"
-                            );
-                        }
+                    if (storageError) {
+                        console.error("Storage削除エラー:", storageError);
                     }
                 }
-
-                alert(
-                    "スポットを更新しました！"
-                );
-
-
-                document.getElementById(
-                    "editSpotForm"
-                ).style.display = "none";
-
-                selectedEditImages = [];
-
-                document.getElementById(
-                    "editPhotoPreview"
-                ).innerHTML = "";
-
-                editingSpotId = null;
-
-
-                // 最新のデータを読み込む
-                await loadPlaces();
             }
-        );
+        }
 
+        // =========================================
+        // 編集保存
+        // =========================================
+        document.getElementById("editSaveButton").addEventListener("click", async function() {
+            if (!currentUserIsMember) {
+                alert("RECメンバーだけが編集できます。");
+                return;
+            }
+
+            if (editingSpotId === null) {
+                alert("編集するスポットが選択されていません。");
+                return;
+            }
+
+            const name = document.getElementById("editSpotName").value.trim();
+            const category = document.getElementById("editSpotCategory").value;
+            const subcategory = document.getElementById("editSpotSubcategory").value.trim();
+            const address = document.getElementById("editSpotAddress").value.trim();
+            const activity = document.getElementById("editSpotActivity").value.trim();
+            const note = document.getElementById("editSpotNote").value.trim();
+
+            if (!name) {
+                alert("スポット名を入力してください。");
+                return;
+            }
+
+            const { error } =
+                await supabaseClient
+                    .from("spots")
+                    .update({
+                        name: name,
+                        category: category,
+                        subcategory: subcategory,
+                        address: address,
+                        activity_history: activity,
+                        note: note
+                    })
+                    .eq("id", editingSpotId);
+
+            if (error) {
+                console.error("スポット更新エラー:", error);
+                alert("スポットの更新に失敗しました。\n" + error.message);
+                return;
+            }
+
+            try {
+                if (imagesToDelete.length > 0) {
+                    await deleteMarkedImages();
+                }
+
+                if (selectedEditImages.length > 0) {
+                    await uploadSpotImages(editingSpotId, selectedEditImages);
+                }
+            } catch (imageError) {
+                console.error("写真更新エラー:", imageError);
+                alert(
+                    "スポットの文章は更新されましたが、写真の一部処理に失敗しました。\n" +
+                    imageError.message
+                );
+            }
+
+            alert("スポットを更新しました！");
+            closeEditForm();
+            await loadPlaces();
+        });
 
         // =========================================
         // スポット削除（管理者のみ）
         // =========================================
-
-        async function deleteSpot(id, name) {
-
+        async function deleteSpot(id) {
             if (!currentUserIsAdmin) {
-                alert("削除できるのは管理者だけです");
+                alert("スポットを削除できるのは管理者だけです。");
+                return;
+            }
+
+            const { data: spot, error: spotError } =
+                await supabaseClient
+                    .from("spots")
+                    .select("name")
+                    .eq("id", id)
+                    .single();
+
+            if (spotError) {
+                alert("スポット情報を取得できませんでした。\n" + spotError.message);
                 return;
             }
 
             const answer = confirm(
-                "「" + name + "」を削除しますか？\n\n" +
+                "「" + (spot.name || "このスポット") + "」を削除しますか？\n\n" +
                 "この操作は元に戻せません。"
             );
 
             if (!answer) {
                 return;
+            }
+
+            // 写真ファイルを先に削除
+            const images = await getSpotImages(id);
+
+            if (images.length > 0) {
+                const filePaths = images
+                    .map(function(image) { return image.file_path; })
+                    .filter(function(path) { return !!path; });
+
+                if (filePaths.length > 0) {
+                    const { error: storageError } =
+                        await supabaseClient.storage
+                            .from("spot-images")
+                            .remove(filePaths);
+
+                    if (storageError) {
+                        console.error("写真ファイル削除エラー:", storageError);
+                    }
+                }
+
+                const { error: imageRowsError } =
+                    await supabaseClient
+                        .from("spot_images")
+                        .delete()
+                        .eq("spot_id", id);
+
+                if (imageRowsError) {
+                    console.error("写真情報削除エラー:", imageRowsError);
+                }
             }
 
             const { error } =
@@ -1693,284 +1274,126 @@
                     .eq("id", id);
 
             if (error) {
-
-                console.error(
-                    "削除エラー:",
-                    error
-                );
-
-                alert(
-                    "削除に失敗しました。\n" +
-                    error.message
-                );
-
+                console.error("スポット削除エラー:", error);
+                alert("スポットの削除に失敗しました。\n" + error.message);
                 return;
             }
 
             alert("スポットを削除しました！");
-
             await loadPlaces();
         }
 
         window.deleteSpot = deleteSpot;
 
-
         // =========================================
         // Googleログイン
         // =========================================
+        loginButton.addEventListener("click", async function() {
+            const { error } =
+                await supabaseClient.auth.signInWithOAuth({
+                    provider: "google",
+                    options: {
+                        redirectTo: "https://ytrnht1222-cmd.github.io/sado_map/"
+                    }
+                });
 
-        const loginButton =
-            document.getElementById(
-                "loginButton"
-            );
-
-        const logoutButton =
-            document.getElementById(
-                "logoutButton"
-            );
-
-        const userInfo =
-            document.getElementById(
-                "userInfo"
-            );
-
-
-        loginButton.addEventListener(
-            "click",
-            async function() {
-
-                const { data, error } =
-                    await supabaseClient.auth
-                        .signInWithOAuth({
-                            provider: "google",
-                            options: {
-                                redirectTo:
-                                    "https://ytrnht1222-cmd.github.io/sado_map/"
-                            }
-                        });
-
-
-                if (error) {
-
-                    console.error(
-                        "ログインエラー:",
-                        error
-                    );
-
-                    alert(
-                        "ログインに失敗しました。\n" +
-                        error.message
-                    );
-                }
+            if (error) {
+                console.error("ログインエラー:", error);
+                alert("ログインに失敗しました。\n" + error.message);
             }
-        );
-
+        });
 
         // =========================================
         // ログアウト
         // =========================================
+        logoutButton.addEventListener("click", async function() {
+            const { error } = await supabaseClient.auth.signOut();
 
-        logoutButton.addEventListener(
-            "click",
-            async function() {
-
-                const { error } =
-                    await supabaseClient.auth.signOut();
-
-
-                if (error) {
-
-                    console.error(
-                        "ログアウトエラー:",
-                        error
-                    );
-
-                    return;
-                }
-
-
-                location.reload();
+            if (error) {
+                console.error("ログアウトエラー:", error);
+                alert("ログアウトに失敗しました。\n" + error.message);
+                return;
             }
-        );
 
+            location.reload();
+        });
 
         // =========================================
-        // 現在ログインしているユーザーを確認
+        // ログイン確認
         // =========================================
-
         async function checkLogin() {
-
             const {
                 data: { session }
-            } =
-                await supabaseClient.auth
-                    .getSession();
+            } = await supabaseClient.auth.getSession();
 
+            currentUserIsMember = false;
+            currentUserIsAdmin = false;
+            editMode = false;
 
-            if (session) {
+            editModeButton.textContent = "✏️ 編集モード";
+            modeText.textContent = "現在：閲覧モード";
 
-                // Googleログイン済み
-                loginButton.style.display =
-                    "none";
-
-                logoutButton.style.display =
-                    "inline-block";
-
-                userInfo.textContent =
-                    "ログイン中：" +
-                    session.user.email;
-
-
-                console.log(
-                    "ログインユーザー:",
-                    session.user
-                );
-
-
-                // RECメンバーか確認
-                const {
-                    data: isMember,
-                    error
-                } =
-                    await supabaseClient.rpc(
-                        "is_rec_member"
-                    );
-
-
-                console.log(
-                    "RECメンバー判定:",
-                    isMember
-                );
-
-                console.log(
-                    "判定エラー:",
-                    error
-                );
-
-
-                if (error) {
-
-                    console.error(
-                        "メンバー確認エラー:",
-                        error
-                    );
-
-                    alert(
-                        "メンバー確認に失敗しました"
-                    );
-
-                    return;
-                }
-
-
-                if (isMember) {
-
-                    console.log(
-                        "RECメンバーです！"
-                    );
-
-                    currentUserIsMember = true;
-
-                    // 管理者かどうかも確認
-                    const {
-                        data: isAdmin,
-                        error: adminError
-                    } =
-                        await supabaseClient.rpc(
-                            "is_rec_admin"
-                        );
-
-                    console.log(
-                        "管理者判定:",
-                        isAdmin
-                    );
-
-                    console.log(
-                        "管理者判定エラー:",
-                        adminError
-                    );
-
-                    if (adminError) {
-                        console.error(
-                            "管理者確認エラー:",
-                            adminError
-                        );
-                        currentUserIsAdmin = false;
-                    } else {
-                        currentUserIsAdmin = !!isAdmin;
-                    }
-
-                    document.getElementById(
-                        "controls"
-                    ).style.display = "block";
-
-                    document.getElementById(
-                        "roleInfo"
-                    ).textContent =
-                        currentUserIsAdmin
-                        ? "（REC管理者）"
-                        : "（RECメンバー）";
-
-                    if (currentUserIsAdmin) {
-                        document.getElementById("adminPanel").style.display = "block";
-                        await loadMembers();
-                    } else {
-                        document.getElementById("adminPanel").style.display = "none";
-                    }
-
-                } else {
-
-                    console.log(
-                        "RECメンバーではありません"
-                    );
-
-                    currentUserIsMember = false;
-
-                    document.getElementById(
-                        "controls"
-                    ).style.display = "none";
-                    document.getElementById("adminPanel").style.display = "none";
-                }
-
-
-            } else {
-
-                // ログアウト状態
-                loginButton.style.display =
-                    "inline-block";
-
-                logoutButton.style.display =
-                    "none";
-
+            if (!session) {
+                loginButton.style.display = "inline-block";
+                logoutButton.style.display = "none";
                 userInfo.textContent = "";
-                document.getElementById(
-                    "roleInfo"
-                ).textContent = "";
+                roleInfo.textContent = "";
+                controls.style.display = "none";
+                adminPanel.style.display = "none";
+                return;
+            }
 
-                currentUserIsMember = false;
+            loginButton.style.display = "none";
+            logoutButton.style.display = "inline-block";
+            userInfo.textContent = "ログイン中：" + (session.user.email || "");
+
+            const { data: isMember, error: memberError } =
+                await supabaseClient.rpc("is_rec_member");
+
+            if (memberError) {
+                console.error("メンバー確認エラー:", memberError);
+                alert("RECメンバー確認に失敗しました。\n" + memberError.message);
+                return;
+            }
+
+            if (!isMember) {
+                roleInfo.textContent = "（RECメンバーではありません）";
+                controls.style.display = "none";
+                adminPanel.style.display = "none";
+                return;
+            }
+
+            currentUserIsMember = true;
+
+            const { data: isAdmin, error: adminError } =
+                await supabaseClient.rpc("is_rec_admin");
+
+            if (adminError) {
+                console.error("管理者確認エラー:", adminError);
                 currentUserIsAdmin = false;
+            } else {
+                currentUserIsAdmin = !!isAdmin;
+            }
 
-                document.getElementById(
-                    "controls"
-                ).style.display = "none";
-                document.getElementById("adminPanel").style.display = "none";
+            roleInfo.textContent =
+                currentUserIsAdmin
+                    ? "（REC管理者）"
+                    : "（RECメンバー）";
 
+            controls.style.display = "block";
 
-                console.log(
-                    "現在ログインしていません"
-                );
+            if (currentUserIsAdmin) {
+                adminPanel.style.display = "block";
+                await loadMembers();
+            } else {
+                adminPanel.style.display = "none";
             }
         }
 
-
-
-
         // =========================================
-        // 管理者：RECメンバー管理
+        // 管理者：メンバー一覧
         // =========================================
-
         async function loadMembers() {
-
             if (!currentUserIsAdmin) {
                 return;
             }
@@ -1983,24 +1406,25 @@
 
             if (error) {
                 console.error("メンバー一覧取得エラー:", error);
-                document.getElementById("memberList").innerHTML =
+                memberList.innerHTML =
                     "<p>メンバー一覧を取得できませんでした。<br>" +
-                    error.message + "</p>";
+                    escapeHtml(error.message) +
+                    "</p>";
                 return;
             }
 
-            const memberList =
-                document.getElementById("memberList");
+            memberList.innerHTML = "";
 
             if (!data || data.length === 0) {
                 memberList.innerHTML = "<p>登録されているメンバーはいません。</p>";
                 return;
             }
 
-            memberList.innerHTML = "<strong>現在のメンバー</strong>";
+            const title = document.createElement("strong");
+            title.textContent = "現在のメンバー";
+            memberList.appendChild(title);
 
             data.forEach(function(member) {
-
                 const row = document.createElement("div");
                 row.className = "member-row";
 
@@ -2010,25 +1434,19 @@
 
                 const role = document.createElement("span");
                 role.className = "member-role";
-                role.textContent =
-                    member.role === "admin"
-                    ? "管理者"
-                    : "メンバー";
+                role.textContent = member.role === "admin" ? "管理者" : "メンバー";
 
                 row.appendChild(email);
                 row.appendChild(role);
 
-                // 管理者はこの画面から削除しない
+                // 管理者の削除ボタンは出さない
                 if (member.role !== "admin") {
                     const removeButton = document.createElement("button");
                     removeButton.type = "button";
-                    removeButton.className = "remove-member-button";
                     removeButton.textContent = "🚫 許可を取り消す";
-
                     removeButton.addEventListener("click", function() {
                         removeMember(member.email);
                     });
-
                     row.appendChild(removeButton);
                 }
 
@@ -2036,23 +1454,22 @@
             });
         }
 
-
+        // =========================================
+        // 管理者：メンバー追加
+        // =========================================
         async function addMember() {
-
             if (!currentUserIsAdmin) {
                 alert("メンバーを追加できるのは管理者だけです。");
                 return;
             }
 
-            const input = document.getElementById("newMemberEmail");
-            const email = input.value.trim().toLowerCase();
+            const email = newMemberEmail.value.trim().toLowerCase();
 
             if (!email) {
                 alert("Googleアカウントのメールアドレスを入力してください。");
                 return;
             }
 
-            // 簡単なメールアドレス形式チェック
             if (!email.includes("@")) {
                 alert("メールアドレスの形式を確認してください。");
                 return;
@@ -2070,7 +1487,7 @@
                 console.error("メンバー追加エラー:", error);
 
                 if (error.code === "23505") {
-                    alert("このGoogleアカウントはすでにメンバーとして登録されています。");
+                    alert("このGoogleアカウントはすでに登録されています。");
                 } else {
                     alert("メンバーの追加に失敗しました。\n" + error.message);
                 }
@@ -2084,15 +1501,16 @@
                 "この人はGoogleログイン後、マップを編集できるようになります。"
             );
 
-            input.value = "";
+            newMemberEmail.value = "";
             await loadMembers();
         }
 
-
+        // =========================================
+        // 管理者：メンバー削除
+        // =========================================
         async function removeMember(email) {
-
             if (!currentUserIsAdmin) {
-                alert("メンバーの削除ができるのは管理者だけです。");
+                alert("メンバーの許可を取り消せるのは管理者だけです。");
                 return;
             }
 
@@ -2122,32 +1540,32 @@
             await loadMembers();
         }
 
+        document.getElementById("addMemberButton").addEventListener("click", addMember);
+        document.getElementById("reloadMembersButton").addEventListener("click", loadMembers);
 
-        document
-            .getElementById("addMemberButton")
-            .addEventListener("click", addMember);
-
-        document
-            .getElementById("newMemberEmail")
-            .addEventListener("keydown", function(event) {
-                if (event.key === "Enter") {
-                    addMember();
-                }
-            });
-
-
-        // =========================================
-        // 最初にログイン確認
-        // その後、スポットを読み込む
-        // =========================================
-
-        checkLogin().then(
-            function() {
-                loadPlaces();
+        newMemberEmail.addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                addMember();
             }
-        );
+        });
 
+        // =========================================
+        // 認証状態が変わったら再確認
+        // =========================================
+        supabaseClient.auth.onAuthStateChange(function() {
+            setTimeout(async function() {
+                await checkLogin();
+                await loadPlaces();
+            }, 0);
+        });
+
+        // =========================================
+        // 最初の読み込み
+        // =========================================
+        (async function initialize() {
+            await checkLogin();
+            await loadPlaces();
+        })();
     </script>
-
 </body>
 </html>
