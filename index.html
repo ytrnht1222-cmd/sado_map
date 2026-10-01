@@ -289,11 +289,11 @@
             display: none;
             position: fixed;
             inset: 0;
-            z-index: 3000;
+            z-index: 99999;
             background: rgba(0, 0, 0, 0.88);
             align-items: center;
             justify-content: center;
-            padding: 24px;
+            padding: 60px 20px 40px;
             box-sizing: border-box;
         }
 
@@ -301,87 +301,64 @@
             display: flex;
         }
 
-        #photoLightbox img {
+        #photoLightboxImage {
             display: block;
             max-width: 92vw;
-            max-height: 88vh;
+            max-height: 82vh;
             width: auto;
             height: auto;
             object-fit: contain;
-            border-radius: 8px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-            user-select: none;
+            border-radius: 6px;
+            box-shadow: 0 8px 35px rgba(0,0,0,0.5);
         }
 
         #photoLightboxClose {
             position: absolute;
-            top: 14px;
-            right: 18px;
-            width: 46px;
-            height: 46px;
-            border: none;
+            top: 15px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            border: 0;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.92);
+            background: rgba(255,255,255,0.9);
             color: #222;
             font-size: 30px;
-            line-height: 46px;
+            line-height: 44px;
             padding: 0;
             cursor: pointer;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
-        }
-
-        #photoLightboxClose:hover {
-            background: white;
+            z-index: 2;
         }
 
         #photoLightboxCaption {
             position: absolute;
-            left: 24px;
-            right: 24px;
-            bottom: 14px;
+            left: 20px;
+            right: 20px;
+            bottom: 12px;
             text-align: center;
             color: white;
-            font-size: 14px;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
-            pointer-events: none;
+            font-size: 15px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
         }
 
         @media (max-width: 600px) {
             #photoLightbox {
-                padding: 12px;
+                padding: 55px 10px 35px;
             }
 
-            #photoLightbox img {
+            #photoLightboxImage {
                 max-width: 96vw;
-                max-height: 82vh;
+                max-height: 84vh;
             }
 
             #photoLightboxClose {
                 top: 10px;
                 right: 10px;
-                width: 42px;
-                height: 42px;
-                line-height: 42px;
-                font-size: 28px;
             }
         }
     </style>
 </head>
 
 <body>
-
-    <!-- 写真ライトボックス -->
-    <div id="photoLightbox" aria-hidden="true">
-        <button
-            type="button"
-            id="photoLightboxClose"
-            aria-label="写真を閉じる"
-            title="閉じる"
-        >×</button>
-
-        <img id="photoLightboxImage" src="" alt="拡大写真">
-        <div id="photoLightboxCaption"></div>
-    </div>
 
     <h1>佐渡島マップ</h1>
 
@@ -433,6 +410,14 @@
     </div>
 
     <div id="map"></div>
+
+
+    <!-- 写真ライトボックス -->
+    <div id="photoLightbox" aria-hidden="true">
+        <button id="photoLightboxClose" type="button" aria-label="写真を閉じる">×</button>
+        <img id="photoLightboxImage" src="" alt="拡大写真">
+        <div id="photoLightboxCaption"></div>
+    </div>
 
     <!-- スポット追加フォーム -->
     <div id="spotForm">
@@ -969,7 +954,8 @@
                             src="${safeUrl}"
                             alt="${safeName}"
                             loading="lazy"
-                            onclick="openPhotoViewer(${JSON.stringify(photoUrl)}, ${JSON.stringify(spotName || "スポット写真")})"
+                            data-photo-url="${safeUrl}"
+                            data-photo-caption="${safeName}"
                             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
                             title="クリックで写真を拡大"
                         >
@@ -1005,11 +991,8 @@
             photoLightboxImage.src = url;
             photoLightboxImage.alt = caption || "スポット写真";
             photoLightboxCaption.textContent = caption || "";
-
             photoLightbox.classList.add("open");
             photoLightbox.setAttribute("aria-hidden", "false");
-
-            // ライトボックス表示中は背景ページをスクロールさせない
             document.body.style.overflow = "hidden";
         }
 
@@ -1024,18 +1007,33 @@
 
         photoLightboxClose.addEventListener("click", closePhotoViewer);
 
-        // 写真そのものではなく、黒い背景部分をクリックしたときも閉じる
+        // 黒い背景部分をクリックして閉じる
         photoLightbox.addEventListener("click", function(event) {
             if (event.target === photoLightbox) {
                 closePhotoViewer();
             }
         });
 
-        // Escキーでも閉じられるようにする
+        // Escキーで閉じる
         document.addEventListener("keydown", function(event) {
             if (event.key === "Escape" && photoLightbox.classList.contains("open")) {
                 closePhotoViewer();
             }
+        });
+
+        // Leafletのポップアップは動的に生成されるため、
+        // document側で写真クリックを受け取る
+        document.addEventListener("click", function(event) {
+            const image = event.target.closest(".spot-gallery img");
+
+            if (!image) {
+                return;
+            }
+
+            const url = image.getAttribute("data-photo-url");
+            const caption = image.getAttribute("data-photo-caption");
+
+            openPhotoViewer(url, caption);
         });
 
         window.openPhotoViewer = openPhotoViewer;
